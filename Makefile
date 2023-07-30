@@ -12,9 +12,11 @@ OBJDIR = objdir
 SOURCES = \
 		src/main.cc
 
+HEADERS =
+
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst .cc,.cc.o,${SOURCES}))
 
-all: demo_0
+all: | format demo_0
 
 demo_0: ${OBJECTS}
 	${CXX} -o demo_0 ${LINKER_FLAGS} $^
@@ -25,7 +27,8 @@ clean:
 	rm -rf ${OBJDIR}
 	rm -f demo_0
 
-.SECONDEXPANSION:
+format:
+	clang-format -i --style=google ${HEADERS} ${SOURCES}
 
 ${OBJDIR}/%.cc.o: %.cc
 	@mkdir -p $(dir $@)

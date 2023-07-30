@@ -1,8 +1,9 @@
 // emscripten includes
 #ifdef __EMSCRIPTEN__
-#include "ems.h"
 #include <emscripten.h>
 #include <emscripten/html5.h>
+
+#include "ems.h"
 #else
 #include <random>
 #endif
@@ -22,8 +23,8 @@ EM_BOOL resize_event_callback(int event_type, const EmscriptenUiEvent *event,
     //((GameRenderer *)ud)->screen_size_changed();
   }
   return false;
-} // resize_event_callback(...)
-} // extern "C"
+}  // resize_event_callback(...)
+}  // extern "C"
 #endif
 
 // Main loop frame

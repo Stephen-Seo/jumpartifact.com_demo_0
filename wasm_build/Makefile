@@ -33,4 +33,4 @@ clean:
 	rm -f jumpartifact.com_demo_0.data
 
 format:
-	clang-format -i --style=file ${SOURCES} ${HEADERS}
+	clang-format -i --style=google ${SOURCES} ${HEADERS}

@@ -19,7 +19,7 @@ OBJECTS = $(addprefix ${OBJDIR}/,$(subst .cc,.cc.o,${SOURCES}))
 all: | format demo_0
 
 demo_0: ${OBJECTS}
-	${CXX} -o demo_0 ${LINKER_FLAGS} $^
+	${CXX} ${CXX_FLAGS} ${LINKER_FLAGS} -o $@ $^
 
 .PHONY: clean format
 

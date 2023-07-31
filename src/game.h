@@ -4,6 +4,9 @@
 // standard library includes
 #include <chrono>
 
+// local includes
+#include "screen.h"
+
 class Game {
  public:
   Game();
@@ -20,10 +23,8 @@ class Game {
   void draw();
 
  private:
-  void update_impl(float dt);
-
+  ScreenStack::Ptr screen_stack;
   std::chrono::steady_clock::time_point prev_time;
-  float TEMP_cached_dt;
 };
 
 #endif

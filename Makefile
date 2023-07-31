@@ -11,10 +11,14 @@ OBJDIR = objdir
 
 SOURCES = \
 		src/main.cc \
-		src/game.cc
+		src/game.cc \
+		src/screen.cc \
+		src/screen_test.cc
 
 HEADERS = \
-		src/game.h
+		src/game.h \
+		src/screen.h \
+		src/screen_test.h
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst .cc,.cc.o,${SOURCES}))
 

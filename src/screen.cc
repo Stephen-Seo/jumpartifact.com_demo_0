@@ -1,6 +1,23 @@
 #include "screen.h"
 
+// standard library includes
+#include <cassert>
+#ifndef NDEBUG
+#include <iostream>
+#endif  // NDEBUG
+
+// local includes
+#include "screen_test.h"
+
 Screen::Screen(std::weak_ptr<ScreenStack> stack) : stack(stack) {}
+
+ScreenStack::PendingAction::PendingAction() : screen(), action(Action::NOP) {}
+
+ScreenStack::PendingAction::PendingAction(Action action)
+    : screen(), action(action) {}
+
+ScreenStack::PendingAction::PendingAction(Screen::Ptr &&screen)
+    : screen(std::forward<Screen::Ptr>(screen)), action(Action::PUSH_SCREEN) {}
 
 ScreenStack::Ptr ScreenStack::new_instance() {
   std::shared_ptr<ScreenStack> ptr =
@@ -10,7 +27,17 @@ ScreenStack::Ptr ScreenStack::new_instance() {
 }
 
 void ScreenStack::update(float dt) {
+  handle_pending_actions();
+
   auto idx = stack.size();
+  if (idx == 0) {
+#ifndef NDEBUG
+    std::cerr << "WARNING: Stack is empty, pushing TestScreen...\n";
+#endif  // NDEBUG
+    push_screen(Screen::new_screen<TestScreen>(self_weak));
+    update(dt);
+    return;
+  }
   while (idx > 0 && stack.at(--idx)->update(dt)) {
   }
 }
@@ -22,13 +49,33 @@ void ScreenStack::draw() {
 }
 
 void ScreenStack::push_screen(Screen::Ptr &&screen) {
-  stack.emplace_back(std::forward<Screen::Ptr>(screen));
+  actions.push_back(PendingAction(std::forward<Screen::Ptr>(screen)));
 }
 
 void ScreenStack::pop_screen() {
-  if (!stack.empty()) {
-    stack.pop_back();
-  }
+  actions.push_back(PendingAction(Action::POP_SCREEN));
 }
 
-ScreenStack::ScreenStack() : self_weak(), stack() {}
+ScreenStack::ScreenStack() : self_weak(), stack(), actions() {}
+
+void ScreenStack::handle_pending_actions() {
+  while (!actions.empty()) {
+    switch (actions.front().action) {
+      case Action::PUSH_SCREEN:
+        stack.push_back(std::move(actions.front().screen));
+        break;
+      case Action::POP_SCREEN:
+        if (!stack.empty()) {
+          stack.pop_back();
+        }
+        break;
+      case Action::NOP:
+        // Intentionally left blank.
+        break;
+      default:
+        assert(!"unreachable");
+        break;
+    }
+    actions.pop_front();
+  }
+}

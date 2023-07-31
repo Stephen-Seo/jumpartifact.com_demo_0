@@ -1,6 +1,7 @@
 #ifndef JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 #define JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 
+#include <deque>
 #include <memory>
 #include <vector>
 
@@ -31,12 +32,30 @@ class Screen {
 
  protected:
   Screen(std::weak_ptr<ScreenStack> stack);
-
- private:
   std::weak_ptr<ScreenStack> stack;
 };
 
 class ScreenStack {
+ private:
+  enum Action { PUSH_SCREEN, POP_SCREEN, NOP };
+
+  struct PendingAction {
+    PendingAction();
+    PendingAction(Action action);
+    PendingAction(Screen::Ptr&&);
+
+    // No copy.
+    PendingAction(const PendingAction&) = delete;
+    PendingAction& operator=(const PendingAction&) = delete;
+
+    // Allow move.
+    PendingAction(PendingAction&&) = default;
+    PendingAction& operator=(PendingAction&&) = default;
+
+    Screen::Ptr screen;
+    Action action;
+  };
+
  public:
   using Ptr = std::shared_ptr<ScreenStack>;
   using Weak = std::weak_ptr<ScreenStack>;
@@ -64,8 +83,11 @@ class ScreenStack {
  private:
   ScreenStack();
 
+  void handle_pending_actions();
+
   Weak self_weak;
   std::vector<Screen::Ptr> stack;
+  std::deque<PendingAction> actions;
 };
 
 template <typename SubScreen>

@@ -33,11 +33,7 @@ void jumpartifact_demo_update(void *ud) {
   Game *game = (Game *)ud;
 
   game->update();
-
-  BeginDrawing();
-  ClearBackground(BLACK);
   game->draw();
-  EndDrawing();
 }
 
 int main() {

@@ -12,6 +12,7 @@
 #include <raylib.h>
 
 // local includes
+#include "game.h"
 
 #ifdef __EMSCRIPTEN__
 extern "C" {
@@ -29,26 +30,33 @@ EM_BOOL resize_event_callback(int event_type, const EmscriptenUiEvent *event,
 
 // Main loop frame
 void jumpartifact_demo_update(void *ud) {
+  Game *game = (Game *)ud;
+
+  game->update();
+
   BeginDrawing();
   ClearBackground(BLACK);
-  DrawText("Testing...", 100, 100, 30, RAYWHITE);
+  game->draw();
   EndDrawing();
 }
 
 int main() {
   InitWindow(800, 800, "Demo");
+
+  Game game{};
+
 #ifdef __EMSCRIPTEN__
   SetWindowSize(call_js_get_canvas_width(), call_js_get_canvas_height());
 
-  emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, 0, false,
+  emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, &game, false,
                                  resize_event_callback);
 
-  emscripten_set_main_loop_arg(jumpartifact_demo_update, 0, 0, 1);
+  emscripten_set_main_loop_arg(jumpartifact_demo_update, &game, 0, 1);
 #else
   SetTargetFPS(60);
 
   while (!WindowShouldClose()) {
-    jumpartifact_demo_update(0);
+    jumpartifact_demo_update(&game);
   }
 
   CloseAudioDevice();

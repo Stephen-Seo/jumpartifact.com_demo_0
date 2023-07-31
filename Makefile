@@ -10,9 +10,11 @@ LINKER_FLAGS = -lraylib
 OBJDIR = objdir
 
 SOURCES = \
-		src/main.cc
+		src/main.cc \
+		src/game.cc
 
-HEADERS =
+HEADERS = \
+		src/game.h
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst .cc,.cc.o,${SOURCES}))
 
@@ -30,6 +32,8 @@ clean:
 format:
 	clang-format -i --style=google ${HEADERS} ${SOURCES}
 
-${OBJDIR}/%.cc.o: %.cc
+.SECONDEXPANSION:
+
+${OBJDIR}/%.cc.o: $$(subst ${OBJDIR}/,,%.cc) ${HEADERS}
 	@mkdir -p $(dir $@)
-	${CXX} -c ${CXX_FLAGS} -o $@ $^
+	${CXX} -c ${CXX_FLAGS} -o $@ $<

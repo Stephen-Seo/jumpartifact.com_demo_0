@@ -6,10 +6,12 @@ endif
 
 SOURCES = \
 		../src/main.cc \
-		../src/ems.cc
+		../src/ems.cc \
+		../src/game.cc
 
 HEADERS = \
-		../src/ems.h
+		../src/ems.h \
+		../src/game.h
 
 CXX = source ${HOME}/git/emsdk/emsdk_env.sh && em++
 

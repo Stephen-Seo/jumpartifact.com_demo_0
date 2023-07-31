@@ -68,6 +68,11 @@ void ScreenStack::handle_pending_actions() {
         if (!stack.empty()) {
           stack.pop_back();
         }
+#ifndef NDEBUG
+        else {
+          std::cerr << "WARNING: Tried to pop screen when stack was empty!\n";
+        }
+#endif  // NDEBUG
         break;
       case Action::NOP:
         // Intentionally left blank.

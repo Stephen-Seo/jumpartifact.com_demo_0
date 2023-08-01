@@ -56,6 +56,10 @@ void ScreenStack::pop_screen() {
   actions.push_back(PendingAction(Action::POP_SCREEN));
 }
 
+void ScreenStack::clear_screens() {
+  actions.push_back(PendingAction(Action::CLEAR_SCREENS));
+}
+
 ScreenStack::ScreenStack() : self_weak(), stack(), actions() {}
 
 void ScreenStack::handle_pending_actions() {
@@ -73,6 +77,14 @@ void ScreenStack::handle_pending_actions() {
           std::cerr << "WARNING: Tried to pop screen when stack was empty!\n";
         }
 #endif  // NDEBUG
+        break;
+      case Action::CLEAR_SCREENS:
+#ifndef NDEBUG
+        if (stack.empty()) {
+          std::cerr << "WARNING: Clearing an empty screen stack!\n";
+        }
+#endif
+        stack.clear();
         break;
       case Action::NOP:
         // Intentionally left blank.

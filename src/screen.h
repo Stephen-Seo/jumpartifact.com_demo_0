@@ -37,7 +37,7 @@ class Screen {
 
 class ScreenStack {
  private:
-  enum Action { PUSH_SCREEN, POP_SCREEN, NOP };
+  enum Action { PUSH_SCREEN, POP_SCREEN, CLEAR_SCREENS, NOP };
 
   struct PendingAction {
     PendingAction();
@@ -79,6 +79,8 @@ class ScreenStack {
   void push_screen();
 
   void pop_screen();
+
+  void clear_screens();
 
  private:
   ScreenStack();

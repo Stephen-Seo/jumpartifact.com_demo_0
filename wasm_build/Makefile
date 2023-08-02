@@ -9,13 +9,17 @@ SOURCES = \
 		../src/ems.cc \
 		../src/game.cc \
 		../src/screen.cc \
-		../src/screen_test.cc
+		../src/screen_test.cc \
+		../src/screen_trunner.cc \
+		../src/3d_helpers.cc
 
 HEADERS = \
 		../src/ems.h \
 		../src/game.h \
 		../src/screen.h \
-		../src/screen_test.h
+		../src/screen_test.h \
+		../src/screen_trunner.h \
+		../src/3d_helpers.h
 
 CXX = source ${HOME}/git/emsdk/emsdk_env.sh && em++
 

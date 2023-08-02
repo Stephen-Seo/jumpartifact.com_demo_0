@@ -39,9 +39,9 @@ void jumpartifact_demo_update(void *ud) {
 int main() {
   InitWindow(800, 800, "Demo");
 
+#ifdef __EMSCRIPTEN__
   Game game{};
 
-#ifdef __EMSCRIPTEN__
   SetWindowSize(call_js_get_canvas_width(), call_js_get_canvas_height());
 
   emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, &game, false,
@@ -49,10 +49,13 @@ int main() {
 
   emscripten_set_main_loop_arg(jumpartifact_demo_update, &game, 0, 1);
 #else
-  SetTargetFPS(60);
+  {
+    Game game{};
+    SetTargetFPS(60);
 
-  while (!WindowShouldClose()) {
-    jumpartifact_demo_update(&game);
+    while (!WindowShouldClose()) {
+      jumpartifact_demo_update(&game);
+    }
   }
 
   CloseAudioDevice();

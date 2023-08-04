@@ -41,11 +41,17 @@ class TRunnerScreen : public Screen {
 
   const Camera3D camera;
   std::bitset<64> flags;
-  Mesh TEMP_cube;
-  Material TEMP_default_material;
+  Model TEMP_cube_model;
+  Texture2D TEMP_cube_texture;
   Matrix TEMP_matrix;
-  Matrix TEMP_offset_matrix;
+  Matrix TEMP_permanent_matrix;
   float TEMP_value;
+  /*
+   * 0 - rotating about z
+   * 1 - rotating about y
+   * 2 - rotating about x
+   */
+  int TEMP_current_state;
 };
 
 #endif

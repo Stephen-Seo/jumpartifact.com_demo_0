@@ -27,11 +27,12 @@ CXX = source ${HOME}/git/emsdk/emsdk_env.sh && em++
 all: | format jumpartifact.com_demo_0.html
 
 jumpartifact.com_demo_0.html: ${SOURCES} ${HEADERS}
-	${CXX} -o jumpartifact.com_demo_0.html \
+	${CXX} -std=c++20 -o jumpartifact.com_demo_0.html \
 		-s USE_GLFW=3 -I../wasm_include -L../wasm_lib -lraylib \
 		--shell-file custom_shell.html \
 		-sEXPORTED_FUNCTIONS=_main \
 		-sEXPORTED_RUNTIME_METHODS=ccall \
+		--preload-file ../res \
 		${OTHER_FLAGS} \
 		${SOURCES}
 

@@ -4,7 +4,7 @@ else
 	COMMON_FLAGS = -DNDEBUG -O3
 endif
 
-CXX_FLAGS = -Wall -Wextra -Wpedantic -Weffc++ ${COMMON_FLAGS}
+CXX_FLAGS = -Wall -Wextra -Wpedantic -Weffc++ ${COMMON_FLAGS} -std=c++20
 LINKER_FLAGS = -lraylib
 
 OBJDIR = objdir

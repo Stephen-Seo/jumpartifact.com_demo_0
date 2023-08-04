@@ -15,7 +15,8 @@ SOURCES = \
 		src/screen.cc \
 		src/screen_test.cc \
 		src/screen_trunner.cc \
-		src/3d_helpers.cc
+		src/3d_helpers.cc \
+		src/raymath.cc
 
 HEADERS = \
 		src/game.h \
@@ -47,7 +48,7 @@ clean:
 	rm -f test
 
 format:
-	clang-format -i --style=google ${HEADERS} ${SOURCES}
+	clang-format -i --style=google ${HEADERS} ${SOURCES} ${TEST_SOURCES}
 
 .SECONDEXPANSION:
 

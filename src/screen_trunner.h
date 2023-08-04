@@ -10,8 +10,7 @@
 // third party includes
 #include <raylib.h>
 
-constexpr float GRID_SPACING_RATE = 1.0F;
-constexpr float GRID_SPACING_OFFSET = 1.5F;
+constexpr float TEMP_VALUE_INC_RATE = 1.0F;
 
 class TRunnerScreen : public Screen {
  public:
@@ -46,8 +45,7 @@ class TRunnerScreen : public Screen {
   Material TEMP_default_material;
   Matrix TEMP_matrix;
   Matrix TEMP_offset_matrix;
-  float grid_spacing;
-  float grid_spacing_modifier;
+  float TEMP_value;
 };
 
 #endif

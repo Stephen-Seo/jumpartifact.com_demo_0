@@ -11,7 +11,8 @@ SOURCES = \
 		../src/screen.cc \
 		../src/screen_test.cc \
 		../src/screen_trunner.cc \
-		../src/3d_helpers.cc
+		../src/3d_helpers.cc \
+		../src/raymath.cc
 
 HEADERS = \
 		../src/ems.h \

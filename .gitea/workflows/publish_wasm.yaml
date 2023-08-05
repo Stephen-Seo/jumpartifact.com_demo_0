@@ -1,0 +1,9 @@
+name: Build and Publish WASM version of demo
+run-name: ${{ gitea.actor }} is building the WASM version
+on: [push]
+
+jobs:
+  Set-Up-emsdk:
+    runs-on: archLinux
+    steps:
+      - run: cd /home/gitea_act_runner && ./build_and_deploy_jumpartifact.com_demo_0.sh

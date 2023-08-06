@@ -6,4 +6,4 @@ jobs:
   Set-Up-emsdk:
     runs-on: archLinux
     steps:
-      - run: cd /home/gitea_act_runner && ./build_and_deploy_jumpartifact.com_demo_0.sh
+      - run: cd && ./build_and_deploy_jumpartifact.com_demo_0.sh

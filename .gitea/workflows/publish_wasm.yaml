@@ -3,7 +3,7 @@ run-name: ${{ gitea.actor }} is building the WASM version
 on: [push]
 
 jobs:
-  Set-Up-emsdk:
+  Build-And-Deploy:
     runs-on: archLinux
     steps:
       - run: cd && ./build_and_deploy_jumpartifact.com_demo_0.sh

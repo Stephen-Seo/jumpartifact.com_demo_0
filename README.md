@@ -3,6 +3,9 @@
 This project will be the demo displayed on the home page of
 [jumpartifact.com](https://jumpartifact.com).
 
+Currently, a Gitea action is configured for this repo to publish the WASM build
+to [jumpartifact.com/demo0](https://jumpartifact.com/demo0/).
+
 ## Setting up
 
 Clone `https://github.com/emscripten-core/emsdk.git` to `${HOME}/git/emsdk`, and

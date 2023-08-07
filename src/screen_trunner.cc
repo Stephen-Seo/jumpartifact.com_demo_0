@@ -4,6 +4,10 @@
 #include <cassert>
 #include <cmath>
 
+#ifndef NDEBUG
+#include <iostream>
+#endif
+
 // local includes
 #include "3d_helpers.h"
 #include "ems.h"
@@ -20,7 +24,9 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       TEMP_matrix(get_identity_matrix()),
       camera_pos{0.0F, 4.0F, 4.0F},
       camera_target{0.0F, 0.0F, 0.0F},
-      pos_value(0.0F) {
+      pos_value(0.0F),
+      mouse_px(0),
+      mouse_pz(0) {
   TEMP_cube_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
       TEMP_cube_texture;
   TEMP_cube_model.transform = TEMP_cube_model.transform *
@@ -43,6 +49,26 @@ bool TRunnerScreen::update(float dt) {
   camera_pos.x = std::sin(pos_value) * 4.0F;
   camera_pos.z = std::cos(pos_value) * 4.0F;
   camera_to_targets(dt);
+
+  if (IsMouseButtonPressed(0)) {
+    float press_x = GetTouchX();
+    float press_y = GetTouchY();
+    Ray ray = GetMouseRay(Vector2{press_x, press_y}, camera);
+#ifndef NDEBUG
+    std::cout << "X: " << press_x << ", Y: " << press_y << std::endl;
+    std::cout << "Ray pos: " << ray.position.x << ", " << ray.position.y << ", "
+              << ray.position.z << " Ray dir: " << ray.direction.x << ", "
+              << ray.direction.y << ", " << ray.direction.z << std::endl;
+#endif
+    if (!ray_to_xz_plane(ray, mouse_px, mouse_pz)) {
+      mouse_px = 0.0F;
+      mouse_pz = 0.0F;
+#ifndef NDEBUG
+      std::cerr << "Ray intersected xz plane out of bounds!\n";
+#endif
+    }
+  }
+
   return false;
 }
 
@@ -53,7 +79,8 @@ bool TRunnerScreen::draw() {
 
   for (int z = -25; z <= 25; ++z) {
     for (int x = -25; x <= 25; ++x) {
-      if (x == 0 && z == 0) {
+      if (x == (int)(mouse_px > 0.0F ? mouse_px + 0.5F : mouse_px - 0.5F) &&
+          z == (int)(mouse_pz > 0.0F ? mouse_pz + 0.5F : mouse_pz - 0.5F)) {
         default_material.maps[MATERIAL_MAP_DIFFUSE].color = RAYWHITE;
       } else {
         default_material.maps[MATERIAL_MAP_DIFFUSE].color =
@@ -74,6 +101,10 @@ bool TRunnerScreen::draw() {
                   .bones = TEMP_cube_model.bones,
                   .bindPose = TEMP_cube_model.bindPose},
             Vector3{0.0F, 0.0F, -4.0F}, 1.0F, WHITE);
+
+  // TODO DEBUG
+  DrawLine3D(Vector3{0.0F, 0.0F, 0.0F}, Vector3{mouse_px, 0.0F, mouse_pz},
+             BLACK);
 
   EndMode3D();
   EndDrawing();

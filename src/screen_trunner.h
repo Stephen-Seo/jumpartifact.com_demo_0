@@ -10,7 +10,7 @@
 // third party includes
 #include <raylib.h>
 
-constexpr float POS_VALUE_INC_RATE = 0.5F;
+constexpr float POS_VALUE_INC_RATE = 0.2F;
 constexpr float CAMERA_UPDATE_RATE = 1.0F;
 
 class TRunnerScreen : public Screen {
@@ -50,6 +50,8 @@ class TRunnerScreen : public Screen {
   Vector3 camera_pos;
   Vector3 camera_target;
   float pos_value;
+  float mouse_px;
+  float mouse_pz;
 
   void camera_to_targets(float dt);
 };

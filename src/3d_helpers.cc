@@ -125,3 +125,21 @@ Matrix scale_matrix_xyz(float x, float y, float z) {
 Matrix operator*(const Matrix &a, const Matrix &b) {
   return MatrixMultiply(a, b);
 }
+
+bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out) {
+  if (ray.direction.y == 0.0F) {
+    return false;
+  }
+  // y = 0 -> amount to set ray.dir to set ray.pos to zero
+  // 0 = py + dy * amount
+  // amount = -py / dy
+  float amount = -ray.position.y / ray.direction.y;
+
+  // x = px + dx * amount
+  x_out = ray.position.x + ray.direction.x * amount;
+
+  // z = pz + dz * amount
+  z_out = ray.position.z + ray.direction.z * amount;
+
+  return true;
+}

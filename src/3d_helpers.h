@@ -18,6 +18,9 @@ extern Matrix scale_matrix_xyz(float x, float y, float z);
 
 extern Matrix operator*(const Matrix &a, const Matrix &b);
 
+/// Returns true if intersects with xz plane.
+extern bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out);
+
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);

@@ -10,7 +10,8 @@
 // third party includes
 #include <raylib.h>
 
-constexpr float TEMP_VALUE_INC_RATE = 1.0F;
+constexpr float POS_VALUE_INC_RATE = 0.5F;
+constexpr float CAMERA_UPDATE_RATE = 1.0F;
 
 class TRunnerScreen : public Screen {
  public:
@@ -39,19 +40,18 @@ class TRunnerScreen : public Screen {
 
   static Color PixelToColor(Pixel p);
 
-  const Camera3D camera;
+  Camera3D camera;
   std::bitset<64> flags;
+  Material default_material;
   Model TEMP_cube_model;
+  Mesh plane_mesh;
   Texture2D TEMP_cube_texture;
   Matrix TEMP_matrix;
-  Matrix TEMP_permanent_matrix;
-  float TEMP_value;
-  /*
-   * 0 - rotating about z
-   * 1 - rotating about y
-   * 2 - rotating about x
-   */
-  int TEMP_current_state;
+  Vector3 camera_pos;
+  Vector3 camera_target;
+  float pos_value;
+
+  void camera_to_targets(float dt);
 };
 
 #endif

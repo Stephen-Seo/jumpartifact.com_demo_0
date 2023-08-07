@@ -117,6 +117,11 @@ Matrix translate_matrix_xyz(float x, float y, float z) {
                 0.0F, 0.0F, 1.0F, z, 0.0F, 0.0F, 0.0F, 1.0F};
 }
 
+Matrix scale_matrix_xyz(float x, float y, float z) {
+  return Matrix{x,    0.0F, 0.0F, 0.0F, 0.0F, y,    0.0F, 0.0F,
+                0.0F, 0.0F, z,    0.0F, 0.0F, 0.0F, 0.0F, 1.0F};
+}
+
 Matrix operator*(const Matrix &a, const Matrix &b) {
   return MatrixMultiply(a, b);
 }

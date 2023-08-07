@@ -14,6 +14,8 @@ extern Matrix translate_matrix_y(float distance);
 extern Matrix translate_matrix_z(float distance);
 extern Matrix translate_matrix_xyz(float x, float y, float z);
 
+extern Matrix scale_matrix_xyz(float x, float y, float z);
+
 extern Matrix operator*(const Matrix &a, const Matrix &b);
 
 // Unimplemented as this function isn't really needed and it exposes some

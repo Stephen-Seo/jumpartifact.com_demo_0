@@ -230,6 +230,31 @@ int main() {
     ASSERT_FLOAT_EQUALS(m.m15, 1.0F);
   }
 
+  {
+    // ray_to_plane tests.
+    auto result =
+        ray_to_plane(Ray{Vector3{0.0F, 0.0F, 1.0F}, Vector3{0.0F, 1.0F, 0.0F}},
+                     Ray{Vector3{0.0F, 2.0F, 0.0F}, Vector3{0.0F, 1.0F, 0.0F}});
+    ASSERT_TRUE(result.has_value());
+    ASSERT_FLOAT_EQUALS(0.0F, result.value().x);
+    ASSERT_FLOAT_EQUALS(2.0F, result.value().y);
+    ASSERT_FLOAT_EQUALS(1.0F, result.value().z);
+
+    result =
+        ray_to_plane(Ray{Vector3{7.0F, 2.0F, 1.0F}, Vector3{0.0F, 1.0F, 0.0F}},
+                     Ray{Vector3{0.0F, 5.0F, 0.0F}, Vector3{0.0F, 1.0F, 0.0F}});
+    ASSERT_TRUE(result.has_value());
+    ASSERT_FLOAT_EQUALS(7.0F, result.value().x);
+    ASSERT_FLOAT_EQUALS(5.0F, result.value().y);
+    ASSERT_FLOAT_EQUALS(1.0F, result.value().z);
+
+    // Parallel to plane test.
+    result =
+        ray_to_plane(Ray{Vector3{7.0F, 2.0F, 1.0F}, Vector3{0.0F, 0.0F, 1.0F}},
+                     Ray{Vector3{0.0F, 5.0F, 0.0F}, Vector3{0.0F, 1.0F, 0.0F}});
+    ASSERT_FALSE(result.has_value());
+  }
+
   std::cout << "Finished tests.\n";
   return 0;
 }

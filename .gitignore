@@ -2,3 +2,4 @@
 /objdir/
 compile_commands.json
 /.cache/
+/test

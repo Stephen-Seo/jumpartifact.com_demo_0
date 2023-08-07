@@ -1,6 +1,9 @@
 #ifndef JUMPARTIFACT_DOT_COM_DEMO_0_3D_HELPERS_H_
 #define JUMPARTIFACT_DOT_COM_DEMO_0_3D_HELPERS_H_
 
+// standard library includes
+#include <optional>
+
 // third party includes
 #include <raylib.h>
 
@@ -20,6 +23,9 @@ extern Matrix operator*(const Matrix &a, const Matrix &b);
 
 /// Returns true if intersects with xz plane.
 extern bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out);
+
+/// plane.direction is plane normal, plane.position is position on plane.
+extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.

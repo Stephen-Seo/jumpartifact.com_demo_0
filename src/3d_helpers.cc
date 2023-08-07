@@ -143,3 +143,20 @@ bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out) {
 
   return true;
 }
+
+std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
+  // Ray dir and plane normal.
+  float rd_pn = Vector3DotProduct(ray.direction, plane.direction);
+  if (rd_pn == 0.0F) {
+    return std::nullopt;
+  }
+
+  float amount = (Vector3DotProduct(plane.position, plane.direction) -
+                  Vector3DotProduct(ray.position, plane.direction)) /
+                 rd_pn;
+
+  // Amount * ray_dir + ray_pos == plane intersection.
+  return Vector3{ray.position.x + ray.direction.x * amount,
+                 ray.position.y + ray.direction.y * amount,
+                 ray.position.z + ray.direction.z * amount};
+}

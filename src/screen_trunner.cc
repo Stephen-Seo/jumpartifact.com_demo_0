@@ -9,6 +9,9 @@
 #include <iostream>
 #endif
 
+// third party includes
+#include <raymath.h>
+
 // local includes
 #include "3d_helpers.h"
 #include "ems.h"
@@ -26,7 +29,12 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       camera_target{0.0F, 0.0F, 0.0F},
       pos_value(0.0F),
       mouse_px(0),
-      mouse_pz(0) {
+      mouse_pz(0),
+      idx_hit(SURFACE_UNIT_WIDTH / 2 +
+              (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
+#ifndef NDEBUG
+  std::cout << "idx_hit initialized to " << idx_hit << std::endl;
+#endif
   TEMP_cube_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
       TEMP_cube_texture;
   TEMP_cube_model.transform = TEMP_cube_model.transform *
@@ -183,6 +191,75 @@ bool TRunnerScreen::update(float dt) {
               << ray.position.z << " Ray dir: " << ray.direction.x << ", "
               << ray.direction.y << ", " << ray.direction.z << std::endl;
 #endif
+
+    for (unsigned int idx = 0; idx < SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
+         ++idx) {
+      int x = idx % SURFACE_UNIT_WIDTH;
+      int y = idx / SURFACE_UNIT_WIDTH;
+      float xf = (float)(x)-SURFACE_X_OFFSET;
+      float zf = (float)(y)-SURFACE_Y_OFFSET;
+
+      const auto &current = surface[idx].value();
+      Vector3 nw{xf - 0.5F, current.nw, zf - 0.5F};
+      Vector3 ne{xf + 0.5F, current.ne, zf - 0.5F};
+      Vector3 sw{xf - 0.5F, current.sw, zf + 0.5F};
+      Vector3 se{xf + 0.5F, current.se, zf + 0.5F};
+
+      {
+        Vector3 a = Vector3Subtract(nw, sw);
+        Vector3 b = Vector3Subtract(ne, sw);
+        Vector3 ortho = Vector3CrossProduct(a, b);
+        ortho = Vector3Normalize(ortho);
+
+        Ray plane{.position = sw, .direction = ortho};
+
+        auto result = ray_to_plane(ray, plane);
+        if (!result.has_value()) {
+          continue;
+        }
+
+        Vector3 bary = Vector3Barycenter(result.value(), nw, sw, ne);
+        if (bary.x >= 0.0F && bary.x <= 1.0F && bary.y >= 0.0F &&
+            bary.y <= 1.0F && bary.z >= 0.0F && bary.z <= 1.0F) {
+          float sum = bary.x + bary.y + bary.z;
+          if (sum > 0.999F && sum < 1.001) {
+            idx_hit = idx;
+#ifndef NDEBUG
+            std::cout << "first: idx_hit set to " << idx_hit << std::endl;
+#endif
+            break;
+          }
+        }
+      }
+
+      {
+        Vector3 a = Vector3Subtract(se, sw);
+        Vector3 b = Vector3Subtract(ne, sw);
+        Vector3 ortho = Vector3CrossProduct(a, b);
+        ortho = Vector3Normalize(ortho);
+
+        Ray plane{.position = sw, .direction = ortho};
+
+        auto result = ray_to_plane(ray, plane);
+        if (!result.has_value()) {
+          continue;
+        }
+
+        Vector3 bary = Vector3Barycenter(result.value(), se, sw, ne);
+        if (bary.x >= 0.0F && bary.x <= 1.0F && bary.y >= 0.0F &&
+            bary.y <= 1.0F && bary.z >= 0.0F && bary.z <= 1.0F) {
+          float sum = bary.x + bary.y + bary.z;
+          if (sum > 0.999F && sum < 1.001) {
+            idx_hit = idx;
+#ifndef NDEBUG
+            std::cout << "second: idx_hit set to " << idx_hit << std::endl;
+#endif
+            break;
+          }
+        }
+      }
+    }
+
     if (!ray_to_xz_plane(ray, mouse_px, mouse_pz)) {
       mouse_px = 0.0F;
       mouse_pz = 0.0F;
@@ -208,15 +285,17 @@ bool TRunnerScreen::draw() {
     int oy = y - SURFACE_UNIT_HEIGHT / 2;
     float xf = (float)(x)-SURFACE_X_OFFSET;
     float zf = (float)(y)-SURFACE_Y_OFFSET;
-    Color color{(unsigned char)(200 + ox * 2), (unsigned char)(150 + oy * 2),
-                20, 255};
-    auto &current = surface[idx];
-    DrawTriangle3D(Vector3{xf - 0.5F, current->nw, zf - 0.5F},
-                   Vector3{xf - 0.5F, current->sw, zf + 0.5F},
-                   Vector3{xf + 0.5F, current->ne, zf - 0.5F}, color);
-    DrawTriangle3D(Vector3{xf + 0.5F, current->se, zf + 0.5F},
-                   Vector3{xf + 0.5F, current->ne, zf - 0.5F},
-                   Vector3{xf - 0.5F, current->sw, zf + 0.5F}, color);
+    Color color = idx == idx_hit
+                      ? RAYWHITE
+                      : Color{(unsigned char)(200 + ox * 2),
+                              (unsigned char)(150 + oy * 2), 20, 255};
+    auto &current = surface[idx].value();
+    DrawTriangle3D(Vector3{xf - 0.5F, current.nw, zf - 0.5F},
+                   Vector3{xf - 0.5F, current.sw, zf + 0.5F},
+                   Vector3{xf + 0.5F, current.ne, zf - 0.5F}, color);
+    DrawTriangle3D(Vector3{xf + 0.5F, current.se, zf + 0.5F},
+                   Vector3{xf + 0.5F, current.ne, zf - 0.5F},
+                   Vector3{xf - 0.5F, current.sw, zf + 0.5F}, color);
   }
 
   // DrawModel(Model{.transform = TEMP_cube_model.transform * TEMP_matrix,

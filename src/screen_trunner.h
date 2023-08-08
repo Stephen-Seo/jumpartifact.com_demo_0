@@ -17,8 +17,8 @@ constexpr float CAMERA_UPDATE_RATE = 1.0F;
 constexpr unsigned int SURFACE_UNIT_WIDTH = 51;
 constexpr unsigned int SURFACE_UNIT_HEIGHT = 51;
 
-constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F;
-constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F;
+constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F - 0.5F;
+constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F - 0.5F;
 
 constexpr float SURFACE_HEIGHT_INTERVAL = 0.5F;
 
@@ -66,6 +66,7 @@ class TRunnerScreen : public Screen {
   float pos_value;
   float mouse_px;
   float mouse_pz;
+  unsigned int idx_hit;
 
   void camera_to_targets(float dt);
 };

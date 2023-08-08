@@ -11,7 +11,7 @@ EM_JS(int, canvas_get_width, (),
 EM_JS(int, canvas_get_height, (),
       { return document.getElementById("canvas").clientHeight; });
 
-EM_JS(int, js_get_random, (), { return Math.random(); });
+EM_JS(float, js_get_random, (), { return Math.random(); });
 
 int call_js_get_canvas_width() { return canvas_get_width(); }
 

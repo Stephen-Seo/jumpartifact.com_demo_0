@@ -6,12 +6,21 @@
 // standard library includes
 #include <array>
 #include <bitset>
+#include <optional>
 
 // third party includes
 #include <raylib.h>
 
 constexpr float POS_VALUE_INC_RATE = 0.2F;
 constexpr float CAMERA_UPDATE_RATE = 1.0F;
+
+constexpr unsigned int SURFACE_UNIT_WIDTH = 51;
+constexpr unsigned int SURFACE_UNIT_HEIGHT = 51;
+
+constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F;
+constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F;
+
+constexpr float SURFACE_HEIGHT_INTERVAL = 0.5F;
 
 class TRunnerScreen : public Screen {
  public:
@@ -38,13 +47,18 @@ class TRunnerScreen : public Screen {
     PIXEL_WHITE
   };
 
+  struct SurfaceUnit {
+    float nw, ne, sw, se;
+  };
+
   static Color PixelToColor(Pixel p);
 
+  std::array<std::optional<SurfaceUnit>,
+             SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
+      surface;
   Camera3D camera;
   std::bitset<64> flags;
-  Material default_material;
   Model TEMP_cube_model;
-  Mesh plane_mesh;
   Texture2D TEMP_cube_texture;
   Matrix TEMP_matrix;
   Vector3 camera_pos;

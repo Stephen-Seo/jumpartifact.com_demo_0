@@ -239,7 +239,7 @@ bool TRunnerScreen::update(float dt) {
 #ifndef NDEBUG
         std::cout << "idx_hit set to " << idx_hit << std::endl;
 #endif
-        this->mouse_hit = collision.value();
+        this->mouse_hit = collision;
 
         this->camera_target.x = xf;
         this->camera_target.y =
@@ -260,14 +260,12 @@ bool TRunnerScreen::update(float dt) {
 
       if (auto bb_collision = GetRayCollisionBox(ray, surface_bbs[idx]);
           bb_collision.hit) {
-        if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
-            collision.has_value()) {
-          on_collide_fn(collision);
-          break;
-        } else if (auto collision = ray_collision_triangle(ray, ne, sw, se);
-                   collision.has_value()) {
-          on_collide_fn(collision);
-          break;
+        if (auto collision = GetRayCollisionTriangle(ray, nw, sw, ne);
+            collision.hit) {
+          on_collide_fn(collision.point);
+        } else if (auto collision = GetRayCollisionTriangle(ray, ne, sw, se);
+                   collision.hit) {
+          on_collide_fn(collision.point);
         }
       }
     }

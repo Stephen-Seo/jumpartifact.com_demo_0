@@ -160,3 +160,30 @@ std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
                  ray.position.y + ray.direction.y * amount,
                  ray.position.z + ray.direction.z * amount};
 }
+
+std::optional<Vector3> ray_collision_triangle(const Ray &ray, const Vector3 &a,
+                                              const Vector3 &b,
+                                              const Vector3 &c) {
+  const Vector3 ab = Vector3Subtract(a, b);
+  const Vector3 cb = Vector3Subtract(c, b);
+  Vector3 ortho = Vector3CrossProduct(ab, cb);
+  ortho = Vector3Normalize(ortho);
+
+  Ray plane{.position = b, .direction = ortho};
+
+  auto result = ray_to_plane(ray, plane);
+  if (!result.has_value()) {
+    return std::nullopt;
+  }
+
+  Vector3 bary = Vector3Barycenter(result.value(), a, b, c);
+  if (bary.x >= 0.0F && bary.x <= 1.0F && bary.y >= 0.0F && bary.y <= 1.0F &&
+      bary.z >= 0.0F && bary.z <= 1.0F) {
+    float sum = bary.x + bary.y + bary.z;
+    if (sum > 0.999F && sum < 1.001) {
+      return result;
+    }
+  }
+
+  return std::nullopt;
+}

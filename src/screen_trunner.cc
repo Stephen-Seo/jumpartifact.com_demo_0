@@ -205,58 +205,18 @@ bool TRunnerScreen::update(float dt) {
       Vector3 sw{xf - 0.5F, current.sw, zf + 0.5F};
       Vector3 se{xf + 0.5F, current.se, zf + 0.5F};
 
-      {
-        Vector3 a = Vector3Subtract(nw, sw);
-        Vector3 b = Vector3Subtract(ne, sw);
-        Vector3 ortho = Vector3CrossProduct(a, b);
-        ortho = Vector3Normalize(ortho);
-
-        Ray plane{.position = sw, .direction = ortho};
-
-        auto result = ray_to_plane(ray, plane);
-        if (!result.has_value()) {
-          continue;
-        }
-
-        Vector3 bary = Vector3Barycenter(result.value(), nw, sw, ne);
-        if (bary.x >= 0.0F && bary.x <= 1.0F && bary.y >= 0.0F &&
-            bary.y <= 1.0F && bary.z >= 0.0F && bary.z <= 1.0F) {
-          float sum = bary.x + bary.y + bary.z;
-          if (sum > 0.999F && sum < 1.001) {
-            idx_hit = idx;
+      if (ray_collision_triangle(ray, nw, sw, ne).has_value()) {
+        idx_hit = idx;
 #ifndef NDEBUG
-            std::cout << "first: idx_hit set to " << idx_hit << std::endl;
+        std::cout << "first: idx_hit set to " << idx_hit << std::endl;
 #endif
-            break;
-          }
-        }
-      }
-
-      {
-        Vector3 a = Vector3Subtract(se, sw);
-        Vector3 b = Vector3Subtract(ne, sw);
-        Vector3 ortho = Vector3CrossProduct(a, b);
-        ortho = Vector3Normalize(ortho);
-
-        Ray plane{.position = sw, .direction = ortho};
-
-        auto result = ray_to_plane(ray, plane);
-        if (!result.has_value()) {
-          continue;
-        }
-
-        Vector3 bary = Vector3Barycenter(result.value(), se, sw, ne);
-        if (bary.x >= 0.0F && bary.x <= 1.0F && bary.y >= 0.0F &&
-            bary.y <= 1.0F && bary.z >= 0.0F && bary.z <= 1.0F) {
-          float sum = bary.x + bary.y + bary.z;
-          if (sum > 0.999F && sum < 1.001) {
-            idx_hit = idx;
+        break;
+      } else if (ray_collision_triangle(ray, ne, sw, se).has_value()) {
+        idx_hit = idx;
 #ifndef NDEBUG
-            std::cout << "second: idx_hit set to " << idx_hit << std::endl;
+        std::cout << "second: idx_hit set to " << idx_hit << std::endl;
 #endif
-            break;
-          }
-        }
+        break;
       }
     }
 

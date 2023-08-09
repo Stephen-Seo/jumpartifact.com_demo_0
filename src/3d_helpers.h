@@ -27,6 +27,11 @@ extern bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out);
 /// plane.direction is plane normal, plane.position is position on plane.
 extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 
+extern std::optional<Vector3> ray_collision_triangle(const Ray &ray,
+                                                     const Vector3 &a,
+                                                     const Vector3 &b,
+                                                     const Vector3 &c);
+
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);

@@ -27,9 +27,8 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       TEMP_matrix(get_identity_matrix()),
       camera_pos{0.0F, 4.0F, 4.0F},
       camera_target{0.0F, 0.0F, 0.0F},
+      mouse_hit{0.0F, 0.0F, 0.0F},
       pos_value(0.0F),
-      mouse_px(0),
-      mouse_pz(0),
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
               (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
 #ifndef NDEBUG
@@ -177,9 +176,6 @@ bool TRunnerScreen::update(float dt) {
   if (pos_value > PI * 2.0F) {
     pos_value -= PI * 2.0F;
   }
-  camera_pos.x = std::sin(pos_value) * 4.0F;
-  camera_pos.z = std::cos(pos_value) * 4.0F;
-  camera_to_targets(dt);
 
   if (IsMouseButtonPressed(0)) {
     float press_x = GetTouchX();
@@ -205,29 +201,57 @@ bool TRunnerScreen::update(float dt) {
       Vector3 sw{xf - 0.5F, current.sw, zf + 0.5F};
       Vector3 se{xf + 0.5F, current.se, zf + 0.5F};
 
-      if (ray_collision_triangle(ray, nw, sw, ne).has_value()) {
+      if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
+          collision.has_value()) {
         idx_hit = idx;
 #ifndef NDEBUG
         std::cout << "first: idx_hit set to " << idx_hit << std::endl;
 #endif
+        mouse_hit = collision.value();
+        camera_target.x = xf;
+        camera_target.y =
+            (current.nw + current.ne + current.sw + current.se) / 4.0F;
+        camera_target.z = zf;
+        if (idx != SURFACE_UNIT_WIDTH / 2 +
+                       (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
+          camera_pos =
+              Vector3Add(Vector3Scale(Vector3Normalize(camera_target), 4.0F),
+                         camera_target);
+          camera_pos.y += 4.0F;
+        } else {
+          camera_pos.x = 0.0F;
+          camera_pos.y = camera_target.y + 4.0F;
+          camera_pos.z = 0.0F;
+        }
         break;
-      } else if (ray_collision_triangle(ray, ne, sw, se).has_value()) {
+      } else if (auto collision = ray_collision_triangle(ray, ne, sw, se);
+                 collision.has_value()) {
         idx_hit = idx;
 #ifndef NDEBUG
         std::cout << "second: idx_hit set to " << idx_hit << std::endl;
 #endif
+        mouse_hit = collision.value();
+        camera_target.x = xf;
+        camera_target.y =
+            (current.nw + current.ne + current.sw + current.se) / 4.0F;
+        camera_target.z = zf;
+        if (idx != SURFACE_UNIT_WIDTH / 2 +
+                       (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
+          camera_pos =
+              Vector3Add(Vector3Scale(Vector3Normalize(camera_target), 4.0F),
+                         camera_target);
+          camera_pos.y += 4.0F;
+        } else {
+          camera_pos.x = 0.0F;
+          camera_pos.y = camera_target.y + 4.0F;
+          camera_pos.z = 0.0F;
+        }
         break;
       }
     }
-
-    if (!ray_to_xz_plane(ray, mouse_px, mouse_pz)) {
-      mouse_px = 0.0F;
-      mouse_pz = 0.0F;
-#ifndef NDEBUG
-      std::cerr << "Ray intersected xz plane out of bounds!\n";
-#endif
-    }
   }
+
+  camera_to_targets(dt);
 
   return false;
 }
@@ -270,8 +294,7 @@ bool TRunnerScreen::draw() {
   //           Vector3{0.0F, 0.0F, -4.0F}, 1.0F, WHITE);
 
   // TODO DEBUG
-  DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, Vector3{mouse_px, 0.0F, mouse_pz},
-             BLACK);
+  DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);
 
   EndMode3D();
   EndDrawing();

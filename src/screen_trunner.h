@@ -63,9 +63,8 @@ class TRunnerScreen : public Screen {
   Matrix TEMP_matrix;
   Vector3 camera_pos;
   Vector3 camera_target;
+  Vector3 mouse_hit;
   float pos_value;
-  float mouse_px;
-  float mouse_pz;
   unsigned int idx_hit;
 
   void camera_to_targets(float dt);

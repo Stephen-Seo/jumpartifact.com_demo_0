@@ -159,6 +159,38 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     }
 
     surface.at(idx) = current;
+
+    // Calculate bounding boxes.
+    int x = idx % SURFACE_UNIT_WIDTH;
+    int y = idx / SURFACE_UNIT_WIDTH;
+    float xf = (float)(x)-SURFACE_X_OFFSET;
+    float zf = (float)(y)-SURFACE_Y_OFFSET;
+    surface_bbs.at(idx).min.x = xf - 0.5F;
+    surface_bbs.at(idx).min.z = zf - 0.5F;
+    surface_bbs.at(idx).max.x = xf + 0.5F;
+    surface_bbs.at(idx).max.z = zf + 0.5F;
+
+    surface_bbs.at(idx).min.y = current.nw;
+    if (current.ne < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.ne;
+    }
+    if (current.sw < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.sw;
+    }
+    if (current.se < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.se;
+    }
+
+    surface_bbs.at(idx).max.y = current.nw;
+    if (current.ne > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.ne;
+    }
+    if (current.sw > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.sw;
+    }
+    if (current.se > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.se;
+    }
   }
 
 #ifndef NDEBUG
@@ -226,14 +258,17 @@ bool TRunnerScreen::update(float dt) {
         }
       };
 
-      if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
-          collision.has_value()) {
-        on_collide_fn(collision);
-        break;
-      } else if (auto collision = ray_collision_triangle(ray, ne, sw, se);
-                 collision.has_value()) {
-        on_collide_fn(collision);
-        break;
+      if (auto bb_collision = GetRayCollisionBox(ray, surface_bbs[idx]);
+          bb_collision.hit) {
+        if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
+            collision.has_value()) {
+          on_collide_fn(collision);
+          break;
+        } else if (auto collision = ray_collision_triangle(ray, ne, sw, se);
+                   collision.has_value()) {
+          on_collide_fn(collision);
+          break;
+        }
       }
     }
   }
@@ -260,7 +295,7 @@ bool TRunnerScreen::draw() {
                       ? RAYWHITE
                       : Color{(unsigned char)(200 + ox * 2),
                               (unsigned char)(150 + oy * 2), 20, 255};
-    auto &current = surface[idx].value();
+    const auto &current = surface[idx].value();
     DrawTriangle3D(Vector3{xf - 0.5F, current.nw, zf - 0.5F},
                    Vector3{xf - 0.5F, current.sw, zf + 0.5F},
                    Vector3{xf + 0.5F, current.ne, zf - 0.5F}, color);

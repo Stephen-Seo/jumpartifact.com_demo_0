@@ -56,6 +56,7 @@ class TRunnerScreen : public Screen {
   std::array<std::optional<SurfaceUnit>,
              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
       surface;
+  std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
   Camera3D camera;
   std::bitset<64> flags;
   Model TEMP_cube_model;

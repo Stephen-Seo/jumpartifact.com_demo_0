@@ -201,51 +201,38 @@ bool TRunnerScreen::update(float dt) {
       Vector3 sw{xf - 0.5F, current.sw, zf + 0.5F};
       Vector3 se{xf + 0.5F, current.se, zf + 0.5F};
 
-      if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
-          collision.has_value()) {
-        idx_hit = idx;
+      const auto on_collide_fn = [this, idx, xf, zf,
+                                  &current](const auto &collision) {
+        this->idx_hit = idx;
 #ifndef NDEBUG
-        std::cout << "first: idx_hit set to " << idx_hit << std::endl;
+        std::cout << "idx_hit set to " << idx_hit << std::endl;
 #endif
-        mouse_hit = collision.value();
-        camera_target.x = xf;
-        camera_target.y =
+        this->mouse_hit = collision.value();
+
+        this->camera_target.x = xf;
+        this->camera_target.y =
             (current.nw + current.ne + current.sw + current.se) / 4.0F;
-        camera_target.z = zf;
+        this->camera_target.z = zf;
         if (idx != SURFACE_UNIT_WIDTH / 2 +
                        (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
-          camera_pos =
-              Vector3Add(Vector3Scale(Vector3Normalize(camera_target), 4.0F),
-                         camera_target);
-          camera_pos.y += 4.0F;
+          this->camera_pos = Vector3Add(
+              Vector3Scale(Vector3Normalize(this->camera_target), 4.0F),
+              this->camera_target);
+          this->camera_pos.y += 4.0F;
         } else {
-          camera_pos.x = 0.0F;
-          camera_pos.y = camera_target.y + 4.0F;
-          camera_pos.z = 0.0F;
+          this->camera_pos.x = 0.0F;
+          this->camera_pos.y = this->camera_target.y + 4.0F;
+          this->camera_pos.z = 0.0F;
         }
+      };
+
+      if (auto collision = ray_collision_triangle(ray, nw, sw, ne);
+          collision.has_value()) {
+        on_collide_fn(collision);
         break;
       } else if (auto collision = ray_collision_triangle(ray, ne, sw, se);
                  collision.has_value()) {
-        idx_hit = idx;
-#ifndef NDEBUG
-        std::cout << "second: idx_hit set to " << idx_hit << std::endl;
-#endif
-        mouse_hit = collision.value();
-        camera_target.x = xf;
-        camera_target.y =
-            (current.nw + current.ne + current.sw + current.se) / 4.0F;
-        camera_target.z = zf;
-        if (idx != SURFACE_UNIT_WIDTH / 2 +
-                       (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
-          camera_pos =
-              Vector3Add(Vector3Scale(Vector3Normalize(camera_target), 4.0F),
-                         camera_target);
-          camera_pos.y += 4.0F;
-        } else {
-          camera_pos.x = 0.0F;
-          camera_pos.y = camera_target.y + 4.0F;
-          camera_pos.z = 0.0F;
-        }
+        on_collide_fn(collision);
         break;
       }
     }

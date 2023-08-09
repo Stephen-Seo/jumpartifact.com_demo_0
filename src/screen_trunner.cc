@@ -263,9 +263,11 @@ bool TRunnerScreen::update(float dt) {
         if (auto collision = GetRayCollisionTriangle(ray, nw, sw, ne);
             collision.hit) {
           on_collide_fn(collision.point);
+          break;
         } else if (auto collision = GetRayCollisionTriangle(ray, ne, sw, se);
                    collision.hit) {
           on_collide_fn(collision.point);
+          break;
         }
       }
     }

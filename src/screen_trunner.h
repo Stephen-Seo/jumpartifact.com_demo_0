@@ -20,7 +20,7 @@ constexpr unsigned int SURFACE_UNIT_HEIGHT = 51;
 constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F - 0.5F;
 constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F - 0.5F;
 
-constexpr float SURFACE_HEIGHT_INTERVAL = 0.5F;
+constexpr float SURFACE_HEIGHT_INTERVAL = 0.7F;
 
 class TRunnerScreen : public Screen {
  public:
@@ -65,7 +65,6 @@ class TRunnerScreen : public Screen {
   Vector3 camera_pos;
   Vector3 camera_target;
   Vector3 mouse_hit;
-  float pos_value;
   unsigned int idx_hit;
 
   void camera_to_targets(float dt);

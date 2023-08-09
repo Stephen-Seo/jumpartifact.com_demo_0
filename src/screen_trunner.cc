@@ -28,7 +28,6 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       camera_pos{0.0F, 4.0F, 4.0F},
       camera_target{0.0F, 0.0F, 0.0F},
       mouse_hit{0.0F, 0.0F, 0.0F},
-      pos_value(0.0F),
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
               (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
 #ifndef NDEBUG
@@ -204,11 +203,6 @@ TRunnerScreen::~TRunnerScreen() {
 }
 
 bool TRunnerScreen::update(float dt) {
-  pos_value += dt * POS_VALUE_INC_RATE;
-  if (pos_value > PI * 2.0F) {
-    pos_value -= PI * 2.0F;
-  }
-
   if (IsMouseButtonPressed(0)) {
     float press_x = GetTouchX();
     float press_y = GetTouchY();

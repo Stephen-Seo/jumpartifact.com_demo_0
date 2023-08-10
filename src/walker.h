@@ -11,11 +11,11 @@
 constexpr float FEET_RADIUS_PLACEMENT_CHECK_SCALE = 1.0F;
 constexpr float FEET_RADIUS_PLACEMENT_SCALE = 0.9F;
 constexpr float FEET_TARGET_RATE = 1.0F;
-constexpr float BODY_TARGET_SPEED = 1.5F;
+constexpr float BODY_TARGET_SPEED = 2.0F;
 constexpr float FEET_LIFT_HEIGHT = 1.0F;
-constexpr float FEET_LIFT_SPEED = 5.0F;
-constexpr float FEET_HORIZ_MOVE_SPEED = 7.0F;
-constexpr float FEET_INIT_POS_VARIANCE_DIV = 4.0F;
+constexpr float FEET_LIFT_SPEED = 5.5F;
+constexpr float FEET_HORIZ_MOVE_SPEED = 8.0F;
+constexpr float FEET_INIT_POS_VARIANCE_DIV = 3.0F;
 
 class Walker {
  public:
@@ -195,15 +195,15 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
   update_leg_fn(target_leg_nw, leg_nw, nw_flags,
                 ((ne_flags & 7) == 1 ? 1 : 0) + ((sw_flags & 7) == 1 ? 1 : 0) +
                     ((se_flags & 7) == 1 ? 1 : 0));
-  update_leg_fn(target_leg_sw, leg_sw, sw_flags,
-                ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
-                    ((se_flags & 7) == 1 ? 1 : 0));
-  update_leg_fn(target_leg_ne, leg_ne, ne_flags,
-                ((nw_flags & 7) == 1 ? 1 : 0) + ((sw_flags & 7) == 1 ? 1 : 0) +
-                    ((se_flags & 7) == 1 ? 1 : 0));
   update_leg_fn(target_leg_se, leg_se, se_flags,
                 ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
                     ((sw_flags & 7) == 1 ? 1 : 0));
+  update_leg_fn(target_leg_ne, leg_ne, ne_flags,
+                ((nw_flags & 7) == 1 ? 1 : 0) + ((sw_flags & 7) == 1 ? 1 : 0) +
+                    ((se_flags & 7) == 1 ? 1 : 0));
+  update_leg_fn(target_leg_sw, leg_sw, sw_flags,
+                ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
+                    ((se_flags & 7) == 1 ? 1 : 0));
 
   // legs to target pos
   //  leg_nw =

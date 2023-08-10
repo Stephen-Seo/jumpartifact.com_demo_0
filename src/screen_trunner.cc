@@ -19,6 +19,7 @@
 TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
+      surface_bbs(),
       camera{Vector3{0.0F, 1.0F, 0.5F}, Vector3{0.0F, 0.0F, 0.0F},
              Vector3{0.0F, 1.0F, 0.0F}, 80.0F, CAMERA_PERSPECTIVE},
       flags(),

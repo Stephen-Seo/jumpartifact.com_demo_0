@@ -12,8 +12,8 @@ Clone `https://github.com/emscripten-core/emsdk.git` to `${HOME}/git/emsdk`, and
 run the following commands in the cloned directory:
 
     git checkout 3.1.44
-    ./emsdk install latest
-    ./emsdk activate latest
+    ./emsdk install 3.1.44
+    ./emsdk activate 3.1.44
 
 Now you can use emsdk by sourcing the `emsdk_env.sh` file and using emcc/em++.
 The Makefile in `wasm_build/` should now "just work" with `make`.

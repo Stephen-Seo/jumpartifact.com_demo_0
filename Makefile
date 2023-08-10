@@ -54,8 +54,6 @@ clean:
 format:
 	clang-format -i --style=google ${HEADERS} ${SOURCES} ${TEST_SOURCES}
 
-.SECONDEXPANSION:
-
-${OBJDIR}/%.cc.o: $$(subst ${OBJDIR}/,,%.cc) ${HEADERS}
+${OBJDIR}/%.cc.o: %.cc ${HEADERS}
 	@mkdir -p $(dir $@)
 	${CXX} -c ${CXX_FLAGS} -o $@ $<

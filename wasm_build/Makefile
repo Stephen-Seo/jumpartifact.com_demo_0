@@ -12,7 +12,8 @@ SOURCES = \
 		../src/screen_test.cc \
 		../src/screen_trunner.cc \
 		../src/3d_helpers.cc \
-		../src/raymath.cc
+		../src/raymath.cc \
+		../src/walker.cc
 
 HEADERS = \
 		../src/ems.h \
@@ -20,7 +21,8 @@ HEADERS = \
 		../src/screen.h \
 		../src/screen_test.h \
 		../src/screen_trunner.h \
-		../src/3d_helpers.h
+		../src/3d_helpers.h \
+		../src/walker.h
 
 CXX = source ${HOME}/git/emsdk/emsdk_env.sh && em++
 

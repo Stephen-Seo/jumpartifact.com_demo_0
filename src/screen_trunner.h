@@ -11,6 +11,9 @@
 // third party includes
 #include <raylib.h>
 
+// local includes
+#include "walker.h"
+
 constexpr float POS_VALUE_INC_RATE = 0.2F;
 constexpr float CAMERA_UPDATE_RATE = 1.0F;
 
@@ -57,6 +60,9 @@ class TRunnerScreen : public Screen {
              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
       surface;
   std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
+
+  Walker walker;
+
   Camera3D camera;
   std::bitset<64> flags;
   Model TEMP_cube_model;

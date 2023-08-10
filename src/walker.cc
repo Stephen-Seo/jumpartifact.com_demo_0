@@ -1,9 +1,13 @@
 #include "walker.h"
 
+// standard library includes
+#include <cmath>
+
 // third party includes
 #include <raymath.h>
 
 // local includes
+#include "3d_helpers.h"
 #include "ems.h"
 
 Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
@@ -25,7 +29,9 @@ Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
       body_height(body_height),
       body_feet_radius(body_feet_radius),
       feet_radius(feet_radius),
-      lift_start_y(0.0F) {
+      lift_start_y(0.0F),
+      rotation(0.0F),
+      target_rotation(0.0F) {
   const Vector3 nw = Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F});
   const Vector3 ne = Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F});
   const Vector3 sw = Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F});
@@ -54,18 +60,77 @@ Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
 }
 
 void Walker::draw(const Model &model) {
+  const Matrix rotationMatrix = get_rotation_matrix_about_y(rotation);
   // draw body
-  DrawModel(model, body_pos, 1.0F, WHITE);
+  DrawModel(Model{.transform = model.transform * rotationMatrix,
+                  .meshCount = model.meshCount,
+                  .materialCount = model.materialCount,
+                  .meshes = model.meshes,
+                  .materials = model.materials,
+                  .meshMaterial = model.meshMaterial,
+                  .boneCount = model.boneCount,
+                  .bones = model.bones,
+                  .bindPose = model.bindPose},
+            body_pos, 1.0F, WHITE);
 
   // draw legs
-  DrawModel(model, leg_nw, 1.0F, WHITE);
-  DrawModel(model, leg_ne, 1.0F, WHITE);
-  DrawModel(model, leg_sw, 1.0F, WHITE);
-  DrawModel(model, leg_se, 1.0F, WHITE);
+  DrawModel(Model{.transform = model.transform * rotationMatrix,
+                  .meshCount = model.meshCount,
+                  .materialCount = model.materialCount,
+                  .meshes = model.meshes,
+                  .materials = model.materials,
+                  .meshMaterial = model.meshMaterial,
+                  .boneCount = model.boneCount,
+                  .bones = model.bones,
+                  .bindPose = model.bindPose},
+            leg_nw, 1.0F, WHITE);
+  DrawModel(Model{.transform = model.transform * rotationMatrix,
+                  .meshCount = model.meshCount,
+                  .materialCount = model.materialCount,
+                  .meshes = model.meshes,
+                  .materials = model.materials,
+                  .meshMaterial = model.meshMaterial,
+                  .boneCount = model.boneCount,
+                  .bones = model.bones,
+                  .bindPose = model.bindPose},
+            leg_ne, 1.0F, WHITE);
+  DrawModel(Model{.transform = model.transform * rotationMatrix,
+                  .meshCount = model.meshCount,
+                  .materialCount = model.materialCount,
+                  .meshes = model.meshes,
+                  .materials = model.materials,
+                  .meshMaterial = model.meshMaterial,
+                  .boneCount = model.boneCount,
+                  .bones = model.bones,
+                  .bindPose = model.bindPose},
+            leg_sw, 1.0F, WHITE);
+  DrawModel(Model{.transform = model.transform * rotationMatrix,
+                  .meshCount = model.meshCount,
+                  .materialCount = model.materialCount,
+                  .meshes = model.meshes,
+                  .materials = model.materials,
+                  .meshMaterial = model.meshMaterial,
+                  .boneCount = model.boneCount,
+                  .bones = model.bones,
+                  .bindPose = model.bindPose},
+            leg_se, 1.0F, WHITE);
 }
 
 void Walker::set_body_pos(Vector3 pos) {
-  target_body_pos = pos;
-  target_body_pos.y += body_height;
-  flags &= ~1;
+  if (!Vector3Equals(target_body_pos, pos)) {
+    target_body_pos = pos;
+    target_body_pos.y += body_height;
+
+    Vector3 direction = Vector3Subtract(pos, body_pos);
+    target_rotation = std::atan2(-direction.z, direction.x);
+    while (target_rotation < 0.0F) {
+      target_rotation += PI * 2.0F;
+    }
+    while (target_rotation > PI * 2.0F) {
+      target_rotation -= PI * 2.0F;
+    }
+
+    flags &= ~3;
+    flags |= 1;
+  }
 }

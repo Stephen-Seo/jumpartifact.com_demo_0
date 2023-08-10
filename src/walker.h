@@ -3,10 +3,16 @@
 
 // standard library includes
 #include <array>
+#ifndef NDEBUG
+#include <iostream>
+#endif
 
 // third party includes
 #include <raylib.h>
 #include <raymath.h>
+
+// local includes
+#include "3d_helpers.h"
 
 constexpr float FEET_RADIUS_PLACEMENT_CHECK_SCALE = 1.0F;
 constexpr float FEET_RADIUS_PLACEMENT_SCALE = 0.9F;
@@ -16,6 +22,7 @@ constexpr float FEET_LIFT_HEIGHT = 1.0F;
 constexpr float FEET_LIFT_SPEED = 5.5F;
 constexpr float FEET_HORIZ_MOVE_SPEED = 8.0F;
 constexpr float FEET_INIT_POS_VARIANCE_DIV = 3.0F;
+constexpr float BODY_ROTATION_SPEED = 1.0F;
 
 class Walker {
  public:
@@ -46,13 +53,17 @@ class Walker {
   // ???1 0??? - is sw
   // ???1 1??? - is se
   unsigned int nw_flags, ne_flags, sw_flags, se_flags;
-  // ???? ???1 - body stopped
+  // ???? ??00 - body stopped
+  // ???? ??01 - rotating to move
+  // ???? ??10 - moving
   unsigned int flags;
 
   const float body_height;
   const float body_feet_radius;
   const float feet_radius;
   float lift_start_y;
+  float rotation;
+  float target_rotation;
 };
 
 template <typename TBBS>
@@ -85,24 +96,56 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
     se_flags |= 1;
   }
 
+  // body rotation
+  if ((flags & 3) == 1) {
+    float diff = target_rotation - rotation;
+    if (diff > PI) {
+      rotation -= dt * BODY_ROTATION_SPEED;
+      if (rotation < 0.0F) {
+        rotation += PI * 2.0F;
+      }
+    } else if (diff < -PI) {
+      rotation += dt * BODY_ROTATION_SPEED;
+      if (rotation > PI * 2.0F) {
+        rotation -= PI * 2.0F;
+      }
+    } else if (diff > 0.0F) {
+      rotation += dt * BODY_ROTATION_SPEED;
+      if (rotation > PI * 2.0F) {
+        rotation -= PI * 2.0F;
+      }
+    } else {
+      rotation -= dt * BODY_ROTATION_SPEED;
+      if (rotation < 0.0F) {
+        rotation += PI * 2.0F;
+      }
+    }
+
+    if (std::abs(target_rotation - rotation) < dt * BODY_ROTATION_SPEED) {
+      rotation = target_rotation;
+      flags &= ~3;
+      flags |= 2;
+    }
+  }
   // body to target pos
-  if ((flags & 1) == 0) {
+  if ((flags & 3) == 2) {
     float diff = Vector3Distance(target_body_pos, body_pos);
     body_pos =
         Vector3Add(body_pos, Vector3Scale(Vector3Normalize(Vector3Subtract(
                                               target_body_pos, body_pos)),
                                           dt * BODY_TARGET_SPEED));
     if (Vector3Distance(target_body_pos, body_pos) > diff) {
-      flags |= 1;
+      flags &= ~3;
       body_pos = target_body_pos;
     }
   }
 
   // moving legs
-  const auto update_leg_fn = [this, &bbs, dt](Vector3 &leg_target,
-                                              Vector3 &leg_pos,
-                                              unsigned int &flags,
-                                              unsigned int grounded_count) {
+  const Matrix rotationMatrix = get_rotation_matrix_about_y(rotation);
+  const auto update_leg_fn = [this, &bbs, dt, &rotationMatrix](
+                                 Vector3 &leg_target, Vector3 &leg_pos,
+                                 unsigned int &flags,
+                                 unsigned int grounded_count) {
     if ((flags & 7) == 1 && grounded_count > 1) {
       // Grounded.
       bool should_lift = false;
@@ -111,16 +154,20 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
       Vector3 ideal_foot_pos;
       if ((flags & 0x18) == 0) {
         // Is nw.
-        ideal_foot_pos = Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F});
+        ideal_foot_pos = Vector3Transform(
+            Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F}), rotationMatrix);
       } else if ((flags & 0x18) == 0x8) {
         // Is ne.
-        ideal_foot_pos = Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F});
+        ideal_foot_pos = Vector3Transform(
+            Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F}), rotationMatrix);
       } else if ((flags & 0x18) == 0x10) {
         // Is sw.
-        ideal_foot_pos = Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F});
+        ideal_foot_pos = Vector3Transform(
+            Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F}), rotationMatrix);
       } else if ((flags & 0x18) == 0x18) {
         // Is se.
-        ideal_foot_pos = Vector3Normalize(Vector3{1.0F, 0.0F, 1.0F});
+        ideal_foot_pos = Vector3Transform(
+            Vector3Normalize(Vector3{1.0F, 0.0F, 1.0F}), rotationMatrix);
       }
       ideal_foot_pos =
           Vector3Add(body_pos_same_y,
@@ -204,24 +251,6 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
   update_leg_fn(target_leg_sw, leg_sw, sw_flags,
                 ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
                     ((se_flags & 7) == 1 ? 1 : 0));
-
-  // legs to target pos
-  //  leg_nw =
-  //      Vector3Add(leg_nw, Vector3Scale(Vector3Subtract(target_leg_nw,
-  //      leg_nw),
-  //                                      dt * FEET_TARGET_RATE));
-  //  leg_ne =
-  //      Vector3Add(leg_ne, Vector3Scale(Vector3Subtract(target_leg_ne,
-  //      leg_ne),
-  //                                      dt * FEET_TARGET_RATE));
-  //  leg_sw =
-  //      Vector3Add(leg_sw, Vector3Scale(Vector3Subtract(target_leg_sw,
-  //      leg_sw),
-  //                                      dt * FEET_TARGET_RATE));
-  //  leg_se =
-  //      Vector3Add(leg_se, Vector3Scale(Vector3Subtract(target_leg_se,
-  //      leg_se),
-  //                                      dt * FEET_TARGET_RATE));
 }
 
 #endif

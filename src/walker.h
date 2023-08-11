@@ -90,12 +90,10 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
       float y = 0.0F;
       float z = (float)(idx / width) - SURFACE_Y_OFFSET;
 
-      Ray downwards{.position = Vector3{x, 20.0F, z},
+      Ray downwards{.position = Vector3{x, bbs[idx].max.y + 1.0F, z},
                     .direction = Vector3{0.0F, -1.0F, 0.0F}};
-      for (const auto &bb : bbs) {
-        if (GetRayCollisionBox(downwards, bb).hit) {
-          y = (bb.min.y + bb.max.y) / 2.0F;
-        }
+      if (GetRayCollisionBox(downwards, bbs[idx]).hit) {
+        y = (bbs[idx].min.y + bbs[idx].max.y) / 2.0F;
       }
 
       set_body_pos(Vector3{x, y, z});

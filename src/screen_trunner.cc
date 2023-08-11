@@ -257,9 +257,8 @@ bool TRunnerScreen::update(float dt) {
         this->camera_target.z = zf;
         if (idx != SURFACE_UNIT_WIDTH / 2 +
                        (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
-          this->camera_pos = Vector3Add(
-              Vector3Scale(Vector3Normalize(this->camera_target), 4.0F),
-              this->camera_target);
+          this->camera_pos = (Vector3Normalize(this->camera_target) * 4.0F) +
+                             this->camera_target;
           this->camera_pos.y += 4.0F;
         } else {
           this->camera_pos.x = 0.0F;
@@ -318,17 +317,6 @@ bool TRunnerScreen::draw() {
                    Vector3{xf + 0.5F, current.ne, zf - 0.5F},
                    Vector3{xf - 0.5F, current.sw, zf + 0.5F}, color);
   }
-
-  // DrawModel(Model{.transform = TEMP_cube_model.transform * TEMP_matrix,
-  //                 .meshCount = TEMP_cube_model.meshCount,
-  //                 .materialCount = TEMP_cube_model.materialCount,
-  //                 .meshes = TEMP_cube_model.meshes,
-  //                 .materials = TEMP_cube_model.materials,
-  //                 .meshMaterial = TEMP_cube_model.meshMaterial,
-  //                 .boneCount = TEMP_cube_model.boneCount,
-  //                 .bones = TEMP_cube_model.bones,
-  //                 .bindPose = TEMP_cube_model.bindPose},
-  //           Vector3{0.0F, 0.0F, -4.0F}, 1.0F, WHITE);
 
   for (auto &walker : walkers) {
     walker.draw(TEMP_cube_model);

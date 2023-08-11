@@ -155,10 +155,8 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
   // body to target pos
   if ((flags & 3) == 2) {
     float diff = Vector3Distance(target_body_pos, body_pos);
-    body_pos =
-        Vector3Add(body_pos, Vector3Scale(Vector3Normalize(Vector3Subtract(
-                                              target_body_pos, body_pos)),
-                                          dt * BODY_TARGET_SPEED));
+    body_pos = body_pos + Vector3Normalize(target_body_pos - body_pos) *
+                              (dt * BODY_TARGET_SPEED);
     if (Vector3Distance(target_body_pos, body_pos) > diff) {
       flags &= ~3;
       body_pos = target_body_pos;
@@ -179,42 +177,38 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
       Vector3 ideal_foot_pos;
       if ((flags & 0x18) == 0) {
         // Is nw.
-        ideal_foot_pos = Vector3Transform(
-            Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F}), rotationMatrix);
+        ideal_foot_pos =
+            rotationMatrix * Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F});
       } else if ((flags & 0x18) == 0x8) {
         // Is ne.
-        ideal_foot_pos = Vector3Transform(
-            Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F}), rotationMatrix);
+        ideal_foot_pos =
+            rotationMatrix * Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F});
       } else if ((flags & 0x18) == 0x10) {
         // Is sw.
-        ideal_foot_pos = Vector3Transform(
-            Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F}), rotationMatrix);
+        ideal_foot_pos =
+            rotationMatrix * Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F});
       } else if ((flags & 0x18) == 0x18) {
         // Is se.
-        ideal_foot_pos = Vector3Transform(
-            Vector3Normalize(Vector3{1.0F, 0.0F, 1.0F}), rotationMatrix);
+        ideal_foot_pos =
+            rotationMatrix * Vector3Normalize(Vector3{1.0F, 0.0F, 1.0F});
       }
       ideal_foot_pos =
-          Vector3Add(body_pos_same_y,
-                     Vector3Scale(ideal_foot_pos, this->body_feet_radius));
+          body_pos_same_y + (ideal_foot_pos * this->body_feet_radius);
       // Check if body is past threshold.
       if (Vector3Distance(ideal_foot_pos, leg_target) >
           FEET_RADIUS_PLACEMENT_CHECK_SCALE * this->feet_radius) {
         should_lift = true;
-        Vector3 diff = Vector3Subtract(this->target_body_pos, this->body_pos);
+        Vector3 diff = this->target_body_pos - this->body_pos;
         if (Vector3Length(diff) > 0.1F) {
           Vector3 dir = Vector3Normalize(diff);
           leg_target =
-              Vector3Add(ideal_foot_pos,
-                         Vector3Scale(dir, this->feet_radius *
-                                               FEET_RADIUS_PLACEMENT_SCALE));
+              ideal_foot_pos +
+              (dir * (this->feet_radius * FEET_RADIUS_PLACEMENT_SCALE));
         } else {
-          Vector3 dir =
-              Vector3Normalize(Vector3Subtract(ideal_foot_pos, leg_target));
+          Vector3 dir = Vector3Normalize(ideal_foot_pos - leg_target);
           leg_target =
-              Vector3Add(ideal_foot_pos,
-                         Vector3Scale(dir, this->feet_radius *
-                                               FEET_RADIUS_PLACEMENT_SCALE));
+              ideal_foot_pos +
+              (dir * (this->feet_radius * FEET_RADIUS_PLACEMENT_SCALE));
         }
         // Get average .y of ground at target position.
         Ray downwards{.position = Vector3{leg_target.x, leg_target.y + 5.0F,
@@ -244,10 +238,9 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
       // Moving horizontally.
       float prev_dist = Vector3Distance(
           leg_pos, Vector3{leg_target.x, leg_pos.y, leg_target.z});
-      Vector3 dir = Vector3Normalize(Vector3Subtract(
-          Vector3{leg_target.x, leg_pos.y, leg_target.z}, leg_pos));
-      leg_pos =
-          Vector3Add(leg_pos, Vector3Scale(dir, dt * FEET_HORIZ_MOVE_SPEED));
+      Vector3 dir = Vector3Normalize(
+          Vector3{leg_target.x, leg_pos.y, leg_target.z} - leg_pos);
+      leg_pos = leg_pos + (dir * (dt * FEET_HORIZ_MOVE_SPEED));
       if (Vector3Distance(leg_pos, Vector3{leg_target.x, leg_pos.y,
                                            leg_target.z}) >= prev_dist) {
         leg_pos.x = leg_target.x;

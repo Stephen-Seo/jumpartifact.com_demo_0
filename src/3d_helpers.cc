@@ -164,3 +164,15 @@ std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
 Vector3 operator+(const Vector3 &a, const Vector3 &b) {
   return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
 }
+
+Vector3 operator-(const Vector3 &a, const Vector3 &b) {
+  return Vector3{a.x - b.x, a.y - b.y, a.z - b.z};
+}
+
+Vector3 operator*(Vector3 vec3, float factor) {
+  return Vector3Scale(vec3, factor);
+}
+
+Vector3 operator*(Matrix mat, Vector3 vec3) {
+  return Vector3Transform(vec3, mat);
+}

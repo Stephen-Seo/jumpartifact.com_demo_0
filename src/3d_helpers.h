@@ -32,5 +32,10 @@ extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);
 
 extern Vector3 operator+(const Vector3 &a, const Vector3 &b);
+extern Vector3 operator-(const Vector3 &a, const Vector3 &b);
+
+extern Vector3 operator*(Vector3 vec3, float factor);
+
+extern Vector3 operator*(Matrix mat, Vector3 vec3);
 
 #endif

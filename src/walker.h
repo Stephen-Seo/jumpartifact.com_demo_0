@@ -35,9 +35,9 @@ class Walker {
   Walker(float x, float z, bool auto_roaming, float body_height = 2.0F,
          float body_feet_radius = 1.7F, float feet_radius = 1.5F);
 
-  template <typename TBBS>
-  void update(float dt, const TBBS &bbs, unsigned int width,
-              unsigned int height);
+  template <typename BBCountT, BBCountT BBCount>
+  void update(float dt, const std::array<BoundingBox, BBCount> &bbs,
+              unsigned int width, unsigned int height);
 
   void draw(const Model &model);
 
@@ -76,9 +76,9 @@ class Walker {
   float roaming_timer;
 };
 
-template <typename TBBS>
-void Walker::update(float dt, const TBBS &bbs, unsigned int width,
-                    unsigned int height) {
+template <typename BBCountT, BBCountT BBCount>
+void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
+                    unsigned int width, unsigned int height) {
   if ((flags & 4) != 0 && (flags & 3) == 0) {
     roaming_timer += dt;
     if (roaming_timer > roaming_time) {
@@ -223,6 +223,7 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
         for (const auto &bb : bbs) {
           if (GetRayCollisionBox(downwards, bb).hit) {
             leg_target.y = (bb.min.y + bb.max.y) / 2.0F;
+            break;
           }
         }
       }

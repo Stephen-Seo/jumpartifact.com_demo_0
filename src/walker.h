@@ -35,7 +35,7 @@ class Walker {
   Walker(float x, float z, bool auto_roaming, float body_height = 2.0F,
          float body_feet_radius = 1.7F, float feet_radius = 1.5F);
 
-  template <typename BBCountT, BBCountT BBCount>
+  template <std::size_t BBCount>
   void update(float dt, const std::array<BoundingBox, BBCount> &bbs,
               unsigned int width, unsigned int height);
 
@@ -76,7 +76,7 @@ class Walker {
   float roaming_timer;
 };
 
-template <typename BBCountT, BBCountT BBCount>
+template <std::size_t BBCount>
 void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
                     unsigned int width, unsigned int height) {
   if ((flags & 4) != 0 && (flags & 3) == 0) {

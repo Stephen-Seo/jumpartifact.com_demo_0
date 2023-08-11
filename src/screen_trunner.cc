@@ -20,7 +20,21 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
       surface_bbs(),
-      walker(),
+      walkers{Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
+                     (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
+
+              Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
+                     (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
+
+              Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
+                     (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET,
+                     true},
+
+              Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
+                     (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET,
+                     true}
+
+      },
       camera{Vector3{0.0F, 1.0F, 0.5F}, Vector3{0.0F, 0.0F, 0.0F},
              Vector3{0.0F, 1.0F, 0.0F}, 80.0F, CAMERA_PERSPECTIVE},
       flags(),
@@ -241,7 +255,6 @@ bool TRunnerScreen::update(float dt) {
         this->camera_target.y =
             (current.nw + current.ne + current.sw + current.se) / 4.0F;
         this->camera_target.z = zf;
-        this->walker.set_body_pos(this->camera_target);
         if (idx != SURFACE_UNIT_WIDTH / 2 +
                        (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
           this->camera_pos = Vector3Add(
@@ -273,7 +286,9 @@ bool TRunnerScreen::update(float dt) {
 
   camera_to_targets(dt);
 
-  walker.update(dt, surface_bbs, SURFACE_UNIT_WIDTH, SURFACE_UNIT_HEIGHT);
+  for (auto &walker : walkers) {
+    walker.update(dt, surface_bbs, SURFACE_UNIT_WIDTH, SURFACE_UNIT_HEIGHT);
+  }
 
   return false;
 }
@@ -315,7 +330,9 @@ bool TRunnerScreen::draw() {
   //                 .bindPose = TEMP_cube_model.bindPose},
   //           Vector3{0.0F, 0.0F, -4.0F}, 1.0F, WHITE);
 
-  walker.draw(TEMP_cube_model);
+  for (auto &walker : walkers) {
+    walker.draw(TEMP_cube_model);
+  }
 
   // TODO DEBUG
   DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);

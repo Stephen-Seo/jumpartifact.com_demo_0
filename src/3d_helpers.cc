@@ -160,3 +160,7 @@ std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
                  ray.position.y + ray.direction.y * amount,
                  ray.position.z + ray.direction.z * amount};
 }
+
+Vector3 operator+(const Vector3 &a, const Vector3 &b) {
+  return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
+}

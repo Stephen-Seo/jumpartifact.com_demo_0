@@ -1,0 +1,10 @@
+#ifndef JUMPARTIFACT_DOT_COM_DEMO_0_COMMON_CONSTANTS_H_
+#define JUMPARTIFACT_DOT_COM_DEMO_0_COMMON_CONSTANTS_H_
+
+constexpr unsigned int SURFACE_UNIT_WIDTH = 51;
+constexpr unsigned int SURFACE_UNIT_HEIGHT = 51;
+
+constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F - 0.5F;
+constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F - 0.5F;
+
+#endif

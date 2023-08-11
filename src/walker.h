@@ -13,6 +13,8 @@
 
 // local includes
 #include "3d_helpers.h"
+#include "common_constants.h"
+#include "ems.h"
 
 constexpr float FEET_RADIUS_PLACEMENT_CHECK_SCALE = 1.0F;
 constexpr float FEET_RADIUS_PLACEMENT_SCALE = 0.9F;
@@ -25,11 +27,13 @@ constexpr float FEET_INIT_POS_VARIANCE_DIV = 3.0F;
 constexpr float BODY_ROTATION_SPEED = 1.0F;
 constexpr float BODY_IDLE_TIMER_RATE = 1.0F;
 constexpr float BODY_IDLE_MOVE_AMOUNT = 0.2F;
+constexpr float ROAMING_WAIT_AMOUNT = 2.0F;
+constexpr float ROAMING_WAIT_VARIANCE = 7.0F;
 
 class Walker {
  public:
-  Walker(float body_height = 2.0F, float body_feet_radius = 1.7F,
-         float feet_radius = 1.5F);
+  Walker(float x, float z, bool auto_roaming, float body_height = 2.0F,
+         float body_feet_radius = 1.7F, float feet_radius = 1.5F);
 
   template <typename TBBS>
   void update(float dt, const TBBS &bbs, unsigned int width,
@@ -58,6 +62,7 @@ class Walker {
   // ???? ??00 - body stopped
   // ???? ??01 - rotating to move
   // ???? ??10 - moving
+  // ???? ?1?? - auto roaming
   unsigned int flags;
 
   const float body_height;
@@ -67,11 +72,36 @@ class Walker {
   float rotation;
   float target_rotation;
   float body_idle_move_timer;
+  float roaming_time;
+  float roaming_timer;
 };
 
 template <typename TBBS>
 void Walker::update(float dt, const TBBS &bbs, unsigned int width,
                     unsigned int height) {
+  if ((flags & 4) != 0 && (flags & 3) == 0) {
+    roaming_timer += dt;
+    if (roaming_timer > roaming_time) {
+      roaming_timer = 0.0F;
+      roaming_time =
+          call_js_get_random() * ROAMING_WAIT_VARIANCE + ROAMING_WAIT_AMOUNT;
+      unsigned int idx = call_js_get_random() * (float)bbs.size();
+      float x = (float)(idx % width) - SURFACE_X_OFFSET;
+      float y = 0.0F;
+      float z = (float)(idx / width) - SURFACE_Y_OFFSET;
+
+      Ray downwards{.position = Vector3{x, 20.0F, z},
+                    .direction = Vector3{0.0F, -1.0F, 0.0F}};
+      for (const auto &bb : bbs) {
+        if (GetRayCollisionBox(downwards, bb).hit) {
+          y = (bb.min.y + bb.max.y) / 2.0F;
+        }
+      }
+
+      set_body_pos(Vector3{x, y, z});
+    }
+  }
+
   const auto initialized_setup_fn = [&bbs](Vector3 &leg, Vector3 &leg_target) {
     Ray downwards{.position = leg, .direction = Vector3{0.0F, -1.0F, 0.0F}};
     for (const auto &bb : bbs) {

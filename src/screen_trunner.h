@@ -12,16 +12,11 @@
 #include <raylib.h>
 
 // local includes
+#include "common_constants.h"
 #include "walker.h"
 
 constexpr float POS_VALUE_INC_RATE = 0.2F;
 constexpr float CAMERA_UPDATE_RATE = 1.0F;
-
-constexpr unsigned int SURFACE_UNIT_WIDTH = 51;
-constexpr unsigned int SURFACE_UNIT_HEIGHT = 51;
-
-constexpr float SURFACE_X_OFFSET = (float)SURFACE_UNIT_WIDTH / 2.0F - 0.5F;
-constexpr float SURFACE_Y_OFFSET = (float)SURFACE_UNIT_HEIGHT / 2.0F - 0.5F;
 
 constexpr float SURFACE_HEIGHT_INTERVAL = 0.7F;
 
@@ -61,7 +56,7 @@ class TRunnerScreen : public Screen {
       surface;
   std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
 
-  Walker walker;
+  std::array<Walker, 4> walkers;
 
   Camera3D camera;
   std::bitset<64> flags;

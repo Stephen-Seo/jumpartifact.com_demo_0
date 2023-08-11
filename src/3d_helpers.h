@@ -31,4 +31,6 @@ extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);
 
+extern Vector3 operator+(const Vector3 &a, const Vector3 &b);
+
 #endif

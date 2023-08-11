@@ -10,9 +10,10 @@
 #include "3d_helpers.h"
 #include "ems.h"
 
-Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
-    : body_pos{0.0F, body_height, 0.0F},
-      target_body_pos{0.0F, body_height, 0.0F},
+Walker::Walker(float x, float z, bool auto_roaming, float body_height,
+               float body_feet_radius, float feet_radius)
+    : body_pos{x, body_height, z},
+      target_body_pos{x, body_height, z},
       leg_nw(),
       leg_ne(),
       leg_sw(),
@@ -32,31 +33,43 @@ Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
       lift_start_y(0.0F),
       rotation(0.0F),
       target_rotation(0.0F),
-      body_idle_move_timer(0.0F) {
+      body_idle_move_timer(0.0F),
+      roaming_time(5.0F),
+      roaming_timer(0.0F) {
+  flags |= auto_roaming ? 4 : 0;
+  roaming_time =
+      call_js_get_random() * ROAMING_WAIT_VARIANCE + ROAMING_WAIT_AMOUNT;
+
   const Vector3 nw = Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F});
   const Vector3 ne = Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F});
   const Vector3 sw = Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F});
   const Vector3 se = Vector3Normalize(Vector3{1.0F, 0.0F, 1.0F});
 
-  leg_nw = Vector3Add(
+  const Vector3 offset{x, 0.0F, z};
+
+  leg_nw =
+      offset +
       Vector3{(call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV, 0.0F,
-              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV},
-      Vector3Scale(nw, body_feet_radius));
+              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV} +
+      Vector3Scale(nw, body_feet_radius);
   target_leg_nw = leg_nw;
-  leg_ne = Vector3Add(
+  leg_ne =
+      offset +
       Vector3{(call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV, 0.0F,
-              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV},
-      Vector3Scale(ne, body_feet_radius));
+              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV} +
+      Vector3Scale(ne, body_feet_radius);
   target_leg_ne = leg_ne;
-  leg_sw = Vector3Add(
+  leg_sw =
+      offset +
       Vector3{(call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV, 0.0F,
-              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV},
-      Vector3Scale(sw, body_feet_radius));
+              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV} +
+      Vector3Scale(sw, body_feet_radius);
   target_leg_sw = leg_sw;
-  leg_se = Vector3Add(
+  leg_se =
+      offset +
       Vector3{(call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV, 0.0F,
-              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV},
-      Vector3Scale(se, body_feet_radius));
+              (call_js_get_random() - 0.5F) / FEET_INIT_POS_VARIANCE_DIV} +
+      Vector3Scale(se, body_feet_radius);
   target_leg_se = leg_se;
 }
 

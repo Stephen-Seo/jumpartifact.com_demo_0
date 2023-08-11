@@ -31,7 +31,8 @@ Walker::Walker(float body_height, float body_feet_radius, float feet_radius)
       feet_radius(feet_radius),
       lift_start_y(0.0F),
       rotation(0.0F),
-      target_rotation(0.0F) {
+      target_rotation(0.0F),
+      body_idle_move_timer(0.0F) {
   const Vector3 nw = Vector3Normalize(Vector3{-1.0F, 0.0F, -1.0F});
   const Vector3 ne = Vector3Normalize(Vector3{1.0F, 0.0F, -1.0F});
   const Vector3 sw = Vector3Normalize(Vector3{-1.0F, 0.0F, 1.0F});
@@ -71,7 +72,11 @@ void Walker::draw(const Model &model) {
                   .boneCount = model.boneCount,
                   .bones = model.bones,
                   .bindPose = model.bindPose},
-            body_pos, 1.0F, WHITE);
+            Vector3{body_pos.x,
+                    body_pos.y + BODY_IDLE_MOVE_AMOUNT *
+                                     std::sin(body_idle_move_timer + PI),
+                    body_pos.z},
+            1.0F, WHITE);
 
   // draw legs
   DrawModel(Model{.transform = model.transform * rotationMatrix,

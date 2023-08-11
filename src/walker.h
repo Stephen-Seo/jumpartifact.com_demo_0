@@ -23,6 +23,8 @@ constexpr float FEET_LIFT_SPEED = 5.5F;
 constexpr float FEET_HORIZ_MOVE_SPEED = 8.0F;
 constexpr float FEET_INIT_POS_VARIANCE_DIV = 3.0F;
 constexpr float BODY_ROTATION_SPEED = 1.0F;
+constexpr float BODY_IDLE_TIMER_RATE = 1.0F;
+constexpr float BODY_IDLE_MOVE_AMOUNT = 0.2F;
 
 class Walker {
  public:
@@ -64,6 +66,7 @@ class Walker {
   float lift_start_y;
   float rotation;
   float target_rotation;
+  float body_idle_move_timer;
 };
 
 template <typename TBBS>
@@ -251,6 +254,25 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
   update_leg_fn(target_leg_sw, leg_sw, sw_flags,
                 ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
                     ((se_flags & 7) == 1 ? 1 : 0));
+
+  if ((flags & 3) == 0) {
+    body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+    if (body_idle_move_timer > PI * 2.0F) {
+      body_idle_move_timer -= PI * 2.0F;
+    }
+  } else if (!FloatEquals(body_idle_move_timer, 0.0F)) {
+    if (body_idle_move_timer < PI) {
+      body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+      if (body_idle_move_timer > PI) {
+        body_idle_move_timer = 0;
+      }
+    } else {
+      body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+      if (body_idle_move_timer > PI * 2.0F) {
+        body_idle_move_timer = 0.0F;
+      }
+    }
+  }
 }
 
 #endif

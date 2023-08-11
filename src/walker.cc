@@ -135,7 +135,9 @@ void Walker::draw(const Model &model) {
 }
 
 void Walker::set_body_pos(Vector3 pos) {
-  if (!Vector3Equals(target_body_pos, pos)) {
+  if (!Vector3Equals(Vector3{target_body_pos.x, target_body_pos.y - body_height,
+                             target_body_pos.z},
+                     pos)) {
     target_body_pos = pos;
     target_body_pos.y += body_height;
 

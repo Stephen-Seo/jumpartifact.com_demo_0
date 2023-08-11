@@ -87,14 +87,8 @@ void Walker::update(float dt, const TBBS &bbs, unsigned int width,
           call_js_get_random() * ROAMING_WAIT_VARIANCE + ROAMING_WAIT_AMOUNT;
       unsigned int idx = call_js_get_random() * (float)bbs.size();
       float x = (float)(idx % width) - SURFACE_X_OFFSET;
-      float y = 0.0F;
+      float y = (bbs[idx].min.y + bbs[idx].max.y) / 2.0F;
       float z = (float)(idx / width) - SURFACE_Y_OFFSET;
-
-      Ray downwards{.position = Vector3{x, bbs[idx].max.y + 1.0F, z},
-                    .direction = Vector3{0.0F, -1.0F, 0.0F}};
-      if (GetRayCollisionBox(downwards, bbs[idx]).hit) {
-        y = (bbs[idx].min.y + bbs[idx].max.y) / 2.0F;
-      }
 
       set_body_pos(Vector3{x, y, z});
     }

@@ -154,3 +154,45 @@ void Walker::set_body_pos(Vector3 pos) {
     flags |= 1;
   }
 }
+
+void Walker::set_player_controlled(bool player_controlled) {
+  if (player_controlled) {
+    flags &= ~0x3B;
+    flags |= 8;
+    target_body_pos = body_pos;
+  } else {
+    flags &= ~0x38;
+  }
+}
+
+void Walker::player_idle() { flags &= ~0x30; }
+
+void Walker::player_turn_left() {
+  flags &= ~0x30;
+  flags |= 0x10;
+  target_body_pos = body_pos;
+}
+
+void Walker::player_turn_right() {
+  flags &= ~0x30;
+  flags |= 0x20;
+  target_body_pos = body_pos;
+}
+
+void Walker::player_go_forward() { flags |= 0x30; }
+
+BoundingBox Walker::get_body_bb() const {
+  return BoundingBox{
+      .min = body_pos - Vector3{0.5F,
+                                0.5F + BODY_IDLE_MOVE_AMOUNT *
+                                           std::sin(body_idle_move_timer + PI),
+                                0.5F},
+      .max = body_pos + Vector3{0.5F,
+                                0.5F + BODY_IDLE_MOVE_AMOUNT *
+                                           std::sin(body_idle_move_timer + PI),
+                                0.5F}};
+}
+
+float Walker::get_rotation() const { return rotation; }
+
+Vector3 Walker::get_body_pos() const { return body_pos; }

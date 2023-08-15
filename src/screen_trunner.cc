@@ -10,6 +10,7 @@
 #endif
 
 // third party includes
+#include <raylib.h>
 #include <raymath.h>
 
 // local includes
@@ -45,7 +46,11 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       camera_target{0.0F, 0.0F, 0.0F},
       mouse_hit{0.0F, 0.0F, 0.0F},
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
-              (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH) {
+              (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH),
+      controlled_walker_idx(std::nullopt),
+      left_text_width(MeasureText("Left", BUTTON_FONT_SIZE)),
+      right_text_width(MeasureText("Right", BUTTON_FONT_SIZE)),
+      forward_text_width(MeasureText("Forward", BUTTON_FONT_SIZE)) {
 #ifndef NDEBUG
   std::cout << "idx_hit initialized to " << idx_hit << std::endl;
 #endif
@@ -219,6 +224,45 @@ TRunnerScreen::~TRunnerScreen() {
 }
 
 bool TRunnerScreen::update(float dt) {
+  if (controlled_walker_idx.has_value()) {
+    auto walker_body_pos =
+        walkers[controlled_walker_idx.value()].get_body_pos();
+
+    camera_target = walker_body_pos + Vector3{0.0F, 1.0F, 0.0F};
+
+    float rotation = walkers[controlled_walker_idx.value()].get_rotation();
+
+    Vector3 offset = get_rotation_matrix_about_y(rotation + PI) *
+                         Vector3{1.0F, 0.0F, 0.0F} * 4.0F +
+                     Vector3{0.0F, 4.0F, 0.0F};
+
+    camera_pos = walkers[controlled_walker_idx.value()].get_body_pos() + offset;
+  }
+
+  if (controlled_walker_idx.has_value() && IsMouseButtonDown(0)) {
+    // Check if clicked on button.
+    if (GetTouchX() >= 0 && GetTouchX() <= left_text_width &&
+        GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
+        GetTouchY() <= GetScreenHeight()) {
+      walkers[controlled_walker_idx.value()].player_turn_left();
+      goto post_check_click;
+    } else if (GetTouchX() >= left_text_width &&
+               GetTouchX() <= left_text_width + right_text_width &&
+               GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
+               GetTouchY() <= GetScreenHeight()) {
+      walkers[controlled_walker_idx.value()].player_turn_right();
+      goto post_check_click;
+    } else if (int width_mid = (left_text_width + right_text_width) / 2 -
+                               forward_text_width / 2;
+               GetTouchX() >= width_mid &&
+               GetTouchX() <= width_mid + forward_text_width &&
+               GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE * 2 &&
+               GetTouchY() <= GetScreenHeight() - BUTTON_FONT_SIZE) {
+      walkers[controlled_walker_idx.value()].player_go_forward();
+      goto post_check_click;
+    }
+  }
+
   if (IsMouseButtonPressed(0)) {
     float press_x = GetTouchX();
     float press_y = GetTouchY();
@@ -230,6 +274,23 @@ bool TRunnerScreen::update(float dt) {
               << ray.direction.y << ", " << ray.direction.z << std::endl;
 #endif
 
+    // Check if clicked on a Walker.
+    for (unsigned int idx = 0; idx < walkers.size(); ++idx) {
+      if (auto walker_bb = walkers[idx].get_body_bb();
+          GetRayCollisionBox(ray, walker_bb).hit) {
+        if (controlled_walker_idx.has_value()) {
+          walkers[controlled_walker_idx.value()].set_player_controlled(false);
+        }
+        controlled_walker_idx = idx;
+        walkers[controlled_walker_idx.value()].set_player_controlled(true);
+
+        idx_hit = SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
+
+        goto post_check_click;
+      }
+    }
+
+    // Check if clicked on ground.
     for (unsigned int idx = 0; idx < SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
          ++idx) {
       int x = idx % SURFACE_UNIT_WIDTH;
@@ -266,6 +327,11 @@ bool TRunnerScreen::update(float dt) {
           this->camera_pos.z = 0.0F;
         }
         this->camera_target.y += 1.0F;
+        if (this->controlled_walker_idx.has_value()) {
+          this->walkers[this->controlled_walker_idx.value()]
+              .set_player_controlled(false);
+          this->controlled_walker_idx = std::nullopt;
+        }
       };
 
       if (auto bb_collision = GetRayCollisionBox(ray, surface_bbs[idx]);
@@ -273,15 +339,21 @@ bool TRunnerScreen::update(float dt) {
         if (auto collision = GetRayCollisionTriangle(ray, nw, sw, ne);
             collision.hit) {
           on_collide_fn(collision.point);
-          break;
+          goto post_check_click;
         } else if (auto collision = GetRayCollisionTriangle(ray, ne, sw, se);
                    collision.hit) {
           on_collide_fn(collision.point);
-          break;
+          goto post_check_click;
         }
       }
     }
+  } else if (IsMouseButtonReleased(0)) {
+    if (controlled_walker_idx.has_value()) {
+      walkers[controlled_walker_idx.value()].player_idle();
+    }
   }
+
+post_check_click:
 
   camera_to_targets(dt);
 
@@ -323,9 +395,34 @@ bool TRunnerScreen::draw() {
   }
 
   // TODO DEBUG
-  DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);
+  if (!controlled_walker_idx.has_value()) {
+    DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);
+  }
 
   EndMode3D();
+
+  if (controlled_walker_idx.has_value()) {
+    int total_width = 0;
+    DrawRectangle(0, GetScreenHeight() - BUTTON_FONT_SIZE, left_text_width,
+                  BUTTON_FONT_SIZE, Color{255, 255, 255, 120});
+    DrawText("Left", 0, GetScreenHeight() - BUTTON_FONT_SIZE, BUTTON_FONT_SIZE,
+             BLACK);
+
+    total_width += left_text_width;
+    DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
+                  right_text_width, BUTTON_FONT_SIZE,
+                  Color{255, 255, 255, 120});
+    DrawText("Right", total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
+             BUTTON_FONT_SIZE, BLACK);
+
+    total_width = (total_width + right_text_width) / 2 - forward_text_width / 2;
+    DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
+                  forward_text_width, BUTTON_FONT_SIZE,
+                  Color{255, 255, 255, 120});
+    DrawText("Forward", total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
+             BUTTON_FONT_SIZE, BLACK);
+  }
+
   EndDrawing();
 
   return false;

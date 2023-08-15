@@ -20,6 +20,8 @@ constexpr float CAMERA_UPDATE_RATE = 1.0F;
 
 constexpr float SURFACE_HEIGHT_INTERVAL = 0.7F;
 
+constexpr int BUTTON_FONT_SIZE = 30;
+
 class TRunnerScreen : public Screen {
  public:
   TRunnerScreen(std::weak_ptr<ScreenStack> stack);
@@ -67,6 +69,10 @@ class TRunnerScreen : public Screen {
   Vector3 camera_target;
   Vector3 mouse_hit;
   unsigned int idx_hit;
+  std::optional<unsigned int> controlled_walker_idx;
+  const int left_text_width;
+  const int right_text_width;
+  const int forward_text_width;
 
   void camera_to_targets(float dt);
 };

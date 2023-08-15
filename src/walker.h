@@ -43,6 +43,16 @@ class Walker {
 
   void set_body_pos(Vector3 pos);
 
+  void set_player_controlled(bool player_controlled);
+  void player_idle();
+  void player_turn_left();
+  void player_turn_right();
+  void player_go_forward();
+
+  BoundingBox get_body_bb() const;
+  float get_rotation() const;
+  Vector3 get_body_pos() const;
+
  private:
   Vector3 body_pos;
   Vector3 target_body_pos;
@@ -63,6 +73,11 @@ class Walker {
   // ???? ??01 - rotating to move
   // ???? ??10 - moving
   // ???? ?1?? - auto roaming
+  // ???? 1??? - player controlled
+  // ??00 ???? - player controlled: idle
+  // ??01 ???? - player controlled: turn left
+  // ??10 ???? - player controlled: turn right
+  // ??11 ???? - player controlled: go forward
   unsigned int flags;
 
   const float body_height;
@@ -79,7 +94,7 @@ class Walker {
 template <std::size_t BBCount>
 void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
                     unsigned int width, unsigned int height) {
-  if ((flags & 4) != 0 && (flags & 3) == 0) {
+  if ((flags & 8) == 0 && (flags & 4) != 0 && (flags & 3) == 0) {
     roaming_timer += dt;
     if (roaming_timer > roaming_time) {
       roaming_timer = 0.0F;
@@ -122,49 +137,72 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
   }
 
   // body rotation
-  if ((flags & 3) == 1) {
-    float diff = target_rotation - rotation;
-    if (diff > PI) {
-      rotation -= dt * BODY_ROTATION_SPEED;
-      if (rotation < 0.0F) {
-        rotation += PI * 2.0F;
+  if ((flags & 8) == 0) {
+    if ((flags & 3) == 1) {
+      float diff = target_rotation - rotation;
+      if (diff > PI) {
+        rotation -= dt * BODY_ROTATION_SPEED;
+        if (rotation < 0.0F) {
+          rotation += PI * 2.0F;
+        }
+      } else if (diff < -PI) {
+        rotation += dt * BODY_ROTATION_SPEED;
+        if (rotation > PI * 2.0F) {
+          rotation -= PI * 2.0F;
+        }
+      } else if (diff > 0.0F) {
+        rotation += dt * BODY_ROTATION_SPEED;
+        if (rotation > PI * 2.0F) {
+          rotation -= PI * 2.0F;
+        }
+      } else {
+        rotation -= dt * BODY_ROTATION_SPEED;
+        if (rotation < 0.0F) {
+          rotation += PI * 2.0F;
+        }
       }
-    } else if (diff < -PI) {
-      rotation += dt * BODY_ROTATION_SPEED;
-      if (rotation > PI * 2.0F) {
-        rotation -= PI * 2.0F;
-      }
-    } else if (diff > 0.0F) {
-      rotation += dt * BODY_ROTATION_SPEED;
-      if (rotation > PI * 2.0F) {
-        rotation -= PI * 2.0F;
-      }
-    } else {
-      rotation -= dt * BODY_ROTATION_SPEED;
-      if (rotation < 0.0F) {
-        rotation += PI * 2.0F;
+
+      if (std::abs(target_rotation - rotation) < dt * BODY_ROTATION_SPEED) {
+        rotation = target_rotation;
+        flags &= ~3;
+        flags |= 2;
       }
     }
-
-    if (std::abs(target_rotation - rotation) < dt * BODY_ROTATION_SPEED) {
-      rotation = target_rotation;
-      flags &= ~3;
-      flags |= 2;
+  } else {
+    if ((flags & 0x30) == 0x10) {
+      rotation += dt * BODY_ROTATION_SPEED;
+    } else if ((flags & 0x30) == 0x20) {
+      rotation -= dt * BODY_ROTATION_SPEED;
     }
   }
+
+  const Matrix rotationMatrix = get_rotation_matrix_about_y(rotation);
+
   // body to target pos
-  if ((flags & 3) == 2) {
-    float diff = Vector3Distance(target_body_pos, body_pos);
-    body_pos = body_pos + Vector3Normalize(target_body_pos - body_pos) *
-                              (dt * BODY_TARGET_SPEED);
-    if (Vector3Distance(target_body_pos, body_pos) > diff) {
-      flags &= ~3;
-      body_pos = target_body_pos;
+  if ((flags & 8) == 0) {
+    if ((flags & 3) == 2) {
+      float diff = Vector3Distance(target_body_pos, body_pos);
+      body_pos = body_pos + Vector3Normalize(target_body_pos - body_pos) *
+                                (dt * BODY_TARGET_SPEED);
+      if (Vector3Distance(target_body_pos, body_pos) > diff) {
+        flags &= ~3;
+        body_pos = target_body_pos;
+      }
     }
+  } else if ((flags & 0x30) == 0x30) {
+    Vector3 dir = rotationMatrix * Vector3{1.0F, 0.0F, 0.0F};
+    Vector3 prev_body_pos = body_pos;
+    body_pos = body_pos + dir * (dt * BODY_TARGET_SPEED);
+    if (body_pos.x < SURFACE_X_OFFSET - (float)SURFACE_UNIT_WIDTH ||
+        body_pos.x > SURFACE_X_OFFSET + (float)SURFACE_UNIT_WIDTH ||
+        body_pos.z < SURFACE_Y_OFFSET - (float)SURFACE_UNIT_HEIGHT ||
+        body_pos.z > SURFACE_Y_OFFSET + (float)SURFACE_UNIT_HEIGHT) {
+      body_pos = prev_body_pos;
+    }
+    target_body_pos = body_pos + dir * 1.0F;
   }
 
   // moving legs
-  const Matrix rotationMatrix = get_rotation_matrix_about_y(rotation);
   const auto update_leg_fn = [this, &bbs, dt, &rotationMatrix](
                                  Vector3 &leg_target, Vector3 &leg_pos,
                                  unsigned int &flags,
@@ -271,10 +309,24 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
                 ((nw_flags & 7) == 1 ? 1 : 0) + ((ne_flags & 7) == 1 ? 1 : 0) +
                     ((se_flags & 7) == 1 ? 1 : 0));
 
-  if ((flags & 3) == 0) {
-    body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
-    if (body_idle_move_timer > PI * 2.0F) {
-      body_idle_move_timer -= PI * 2.0F;
+  if ((flags & 8) == 0) {
+    if ((flags & 3) == 0) {
+      body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+      if (body_idle_move_timer > PI * 2.0F) {
+        body_idle_move_timer -= PI * 2.0F;
+      }
+    } else if (!FloatEquals(body_idle_move_timer, 0.0F)) {
+      if (body_idle_move_timer < PI) {
+        body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+        if (body_idle_move_timer > PI) {
+          body_idle_move_timer = 0;
+        }
+      } else {
+        body_idle_move_timer += dt * BODY_IDLE_TIMER_RATE;
+        if (body_idle_move_timer > PI * 2.0F) {
+          body_idle_move_timer = 0.0F;
+        }
+      }
     }
   } else if (!FloatEquals(body_idle_move_timer, 0.0F)) {
     if (body_idle_move_timer < PI) {

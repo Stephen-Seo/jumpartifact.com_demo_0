@@ -272,7 +272,9 @@ bool TRunnerScreen::update(float dt) {
       walkers[controlled_walker_idx.value()].player_idle();
       goto post_check_click;
     }
-  } else if (IsMouseButtonPressed(0)) {
+  }
+
+  if (IsMouseButtonPressed(0)) {
     float press_x = GetTouchX();
     float press_y = GetTouchY();
     Ray ray = GetMouseRay(Vector2{press_x, press_y}, camera);

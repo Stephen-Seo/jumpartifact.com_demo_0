@@ -404,6 +404,13 @@ bool TRunnerScreen::draw() {
   // TODO DEBUG
   if (!controlled_walker_idx.has_value()) {
     DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);
+
+    for (const auto &walker : walkers) {
+      BoundingBox bb = walker.get_body_bb();
+      bb.min = bb.min - Vector3{0.001F, 0.001F, 0.001F};
+      bb.max = bb.max + Vector3{0.001F, 0.001F, 0.001F};
+      DrawBoundingBox(bb, RED);
+    }
   }
 
   EndMode3D();

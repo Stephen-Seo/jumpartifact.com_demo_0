@@ -185,6 +185,14 @@ void Walker::player_turn_right() {
 
 void Walker::player_go_forward() { flags |= 0x30; }
 
+bool Walker::player_is_idle() const { return (flags & 0x30) == 0; }
+
+bool Walker::player_is_turning_left() const { return (flags & 0x30) == 0x10; }
+
+bool Walker::player_is_turning_right() const { return (flags & 0x30) == 0x20; }
+
+bool Walker::player_is_going_forward() const { return (flags & 0x30) == 0x30; }
+
 BoundingBox Walker::get_body_bb() const {
   return BoundingBox{
       .min = body_pos - Vector3{0.5F,

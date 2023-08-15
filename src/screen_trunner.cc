@@ -241,29 +241,38 @@ bool TRunnerScreen::update(float dt) {
 
   if (controlled_walker_idx.has_value() && IsMouseButtonDown(0)) {
     // Check if clicked on button.
-    if (GetTouchX() >= 0 && GetTouchX() <= left_text_width &&
+    if (!walkers[controlled_walker_idx.value()].player_is_turning_left() &&
+        GetTouchX() >= 0 && GetTouchX() <= left_text_width &&
         GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
         GetTouchY() <= GetScreenHeight()) {
       walkers[controlled_walker_idx.value()].player_turn_left();
       goto post_check_click;
-    } else if (GetTouchX() >= left_text_width &&
+    } else if (!walkers[controlled_walker_idx.value()]
+                    .player_is_turning_right() &&
+               GetTouchX() >= left_text_width &&
                GetTouchX() <= left_text_width + right_text_width &&
                GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
                GetTouchY() <= GetScreenHeight()) {
       walkers[controlled_walker_idx.value()].player_turn_right();
       goto post_check_click;
-    } else if (int width_mid = (left_text_width + right_text_width) / 2 -
-                               forward_text_width / 2;
-               GetTouchX() >= width_mid &&
-               GetTouchX() <= width_mid + forward_text_width &&
-               GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE * 2 &&
-               GetTouchY() <= GetScreenHeight() - BUTTON_FONT_SIZE) {
-      walkers[controlled_walker_idx.value()].player_go_forward();
+    } else if (!walkers[controlled_walker_idx.value()]
+                    .player_is_going_forward()) {
+      if (int width_mid =
+              (left_text_width + right_text_width) / 2 - forward_text_width / 2;
+          GetTouchX() >= width_mid &&
+          GetTouchX() <= width_mid + forward_text_width &&
+          GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE * 2 &&
+          GetTouchY() <= GetScreenHeight() - BUTTON_FONT_SIZE) {
+        walkers[controlled_walker_idx.value()].player_go_forward();
+        goto post_check_click;
+      }
+    }
+  } else if (IsMouseButtonReleased(0)) {
+    if (controlled_walker_idx.has_value()) {
+      walkers[controlled_walker_idx.value()].player_idle();
       goto post_check_click;
     }
-  }
-
-  if (IsMouseButtonPressed(0)) {
+  } else if (IsMouseButtonPressed(0)) {
     float press_x = GetTouchX();
     float press_y = GetTouchY();
     Ray ray = GetMouseRay(Vector2{press_x, press_y}, camera);
@@ -346,10 +355,6 @@ bool TRunnerScreen::update(float dt) {
           goto post_check_click;
         }
       }
-    }
-  } else if (IsMouseButtonReleased(0)) {
-    if (controlled_walker_idx.has_value()) {
-      walkers[controlled_walker_idx.value()].player_idle();
     }
   }
 

@@ -49,6 +49,11 @@ class Walker {
   void player_turn_right();
   void player_go_forward();
 
+  bool player_is_idle() const;
+  bool player_is_turning_left() const;
+  bool player_is_turning_right() const;
+  bool player_is_going_forward() const;
+
   BoundingBox get_body_bb() const;
   float get_rotation() const;
   Vector3 get_body_pos() const;

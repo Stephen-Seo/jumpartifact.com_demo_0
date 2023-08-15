@@ -193,13 +193,24 @@ void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
     Vector3 dir = rotationMatrix * Vector3{1.0F, 0.0F, 0.0F};
     Vector3 prev_body_pos = body_pos;
     body_pos = body_pos + dir * (dt * BODY_TARGET_SPEED);
-    if (body_pos.x < SURFACE_X_OFFSET - (float)SURFACE_UNIT_WIDTH ||
-        body_pos.x > SURFACE_X_OFFSET + (float)SURFACE_UNIT_WIDTH ||
-        body_pos.z < SURFACE_Y_OFFSET - (float)SURFACE_UNIT_HEIGHT ||
-        body_pos.z > SURFACE_Y_OFFSET + (float)SURFACE_UNIT_HEIGHT) {
+    if (body_pos.x < SURFACE_X_OFFSET - (float)SURFACE_UNIT_WIDTH + 0.5F ||
+        body_pos.x > SURFACE_X_OFFSET + 0.5F ||
+        body_pos.z < SURFACE_Y_OFFSET - (float)SURFACE_UNIT_HEIGHT + 0.5F ||
+        body_pos.z > SURFACE_Y_OFFSET + 0.5F) {
       body_pos = prev_body_pos;
     }
     target_body_pos = body_pos + dir * 1.0F;
+
+    // Ensure body is at proper height above surface.
+    float target_height = body_pos.y;
+    Ray downwards{.position = body_pos,
+                  .direction = Vector3{0.0F, -1.0F, 0.0F}};
+    for (auto &bb : bbs) {
+      if (GetRayCollisionBox(downwards, bb).hit) {
+        target_height = (bb.min.y + bb.max.y) / 2.0F + body_height;
+      }
+    }
+    body_pos.y += (target_height - body_pos.y) * (dt * BODY_TARGET_SPEED);
   }
 
   // moving legs

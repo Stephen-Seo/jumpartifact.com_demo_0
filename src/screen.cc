@@ -14,7 +14,21 @@ Screen::Screen(std::weak_ptr<ScreenStack> stack) : stack(stack) {}
 ScreenStack::PendingAction::PendingAction() : screen(), action(Action::NOP) {}
 
 ScreenStack::PendingAction::PendingAction(Action action)
-    : screen(), action(action) {}
+    : screen(), action(action) {
+  switch (action) {
+    case Action::PUSH_SCREEN:
+    case Action::CONSTRUCT_SCREEN:
+      // Cannot push non-existant screen.
+      this->action = Action::NOP;
+#ifndef NDEBUG
+      std::clog << "WARNING: Cannot create PendingAction with PUSH_SCREEN or "
+                   "CONSTRUCT_SCREEN!\n";
+#endif
+      break;
+    default:
+      break;
+  }
+}
 
 ScreenStack::PendingAction::PendingAction(Screen::Ptr &&screen)
     : screen(std::forward<Screen::Ptr>(screen)), action(Action::PUSH_SCREEN) {}

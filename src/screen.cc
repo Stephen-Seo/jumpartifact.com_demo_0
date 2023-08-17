@@ -19,6 +19,11 @@ ScreenStack::PendingAction::PendingAction(Action action)
 ScreenStack::PendingAction::PendingAction(Screen::Ptr &&screen)
     : screen(std::forward<Screen::Ptr>(screen)), action(Action::PUSH_SCREEN) {}
 
+ScreenStack::PendingAction::PendingAction(
+    std::function<Screen::Ptr(ScreenStack::Weak)> &&fn)
+    : screen(std::forward<std::function<Screen::Ptr(ScreenStack::Weak)> >(fn)),
+      action(Action::CONSTRUCT_SCREEN) {}
+
 ScreenStack::Ptr ScreenStack::new_instance() {
   std::shared_ptr<ScreenStack> ptr =
       std::shared_ptr<ScreenStack>(new ScreenStack{});
@@ -66,7 +71,8 @@ void ScreenStack::handle_pending_actions() {
   while (!actions.empty()) {
     switch (actions.front().action) {
       case Action::PUSH_SCREEN:
-        stack.push_back(std::move(actions.front().screen));
+        stack.emplace_back(
+            std::move(std::get<Screen::Ptr>(actions.front().screen)));
         break;
       case Action::POP_SCREEN:
         if (!stack.empty()) {
@@ -85,6 +91,11 @@ void ScreenStack::handle_pending_actions() {
         }
 #endif
         stack.clear();
+        break;
+      case Action::CONSTRUCT_SCREEN:
+        stack.emplace_back(
+            std::get<std::function<Screen::Ptr(ScreenStack::Weak)> >(
+                actions.front().screen)(self_weak));
         break;
       case Action::NOP:
         // Intentionally left blank.

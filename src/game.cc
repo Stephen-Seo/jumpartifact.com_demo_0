@@ -9,7 +9,7 @@
 Game::Game()
     : screen_stack(ScreenStack::new_instance()),
       prev_time(std::chrono::steady_clock::now()) {
-  screen_stack->push_screen<TRunnerScreen>();
+  screen_stack->push_constructing_screen<TRunnerScreen>();
 }
 
 void Game::update() {

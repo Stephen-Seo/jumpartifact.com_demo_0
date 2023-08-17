@@ -2,7 +2,9 @@
 #define JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 
 #include <deque>
+#include <functional>
 #include <memory>
+#include <variant>
 #include <vector>
 
 // Forward declaration.
@@ -36,13 +38,18 @@ class Screen {
 };
 
 class ScreenStack {
+ public:
+  using Ptr = std::shared_ptr<ScreenStack>;
+  using Weak = std::weak_ptr<ScreenStack>;
+
  private:
-  enum Action { PUSH_SCREEN, POP_SCREEN, CLEAR_SCREENS, NOP };
+  enum Action { PUSH_SCREEN, POP_SCREEN, CLEAR_SCREENS, CONSTRUCT_SCREEN, NOP };
 
   struct PendingAction {
     PendingAction();
     PendingAction(Action action);
     PendingAction(Screen::Ptr&&);
+    PendingAction(std::function<Screen::Ptr(ScreenStack::Weak)>&&);
 
     // No copy.
     PendingAction(const PendingAction&) = delete;
@@ -52,14 +59,12 @@ class ScreenStack {
     PendingAction(PendingAction&&) = default;
     PendingAction& operator=(PendingAction&&) = default;
 
-    Screen::Ptr screen;
+    std::variant<Screen::Ptr, std::function<Screen::Ptr(ScreenStack::Weak)> >
+        screen;
     Action action;
   };
 
  public:
-  using Ptr = std::shared_ptr<ScreenStack>;
-  using Weak = std::weak_ptr<ScreenStack>;
-
   static Ptr new_instance();
 
   // No copy.
@@ -77,6 +82,9 @@ class ScreenStack {
 
   template <typename SubScreen>
   void push_screen();
+
+  template <typename SubScreen>
+  void push_constructing_screen();
 
   void pop_screen();
 
@@ -99,7 +107,14 @@ Screen::Ptr Screen::new_screen(std::weak_ptr<ScreenStack> stack) {
 
 template <typename SubScreen>
 void ScreenStack::push_screen() {
-  stack.emplace_back(Screen::new_screen<SubScreen>(self_weak));
+  actions.emplace_back(Screen::new_screen<SubScreen>(self_weak));
+}
+
+template <typename SubScreen>
+void ScreenStack::push_constructing_screen() {
+  actions.emplace_back([](ScreenStack::Weak ss) -> Screen::Ptr {
+    return Screen::new_screen<SubScreen>(ss);
+  });
 }
 
 #endif

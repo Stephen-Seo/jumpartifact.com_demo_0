@@ -57,5 +57,5 @@ format:
 .SECONDEXPANSION:
 
 ${OBJDIR}/%.cc.o: $$(subst PREVDIR,..,%.cc) ${HEADERS}
-	@mkdir -p "${OBJDIR}/$(dir $(subst ..,PREVDIR,$<))"
+	@mkdir -p "$(dir $@)"
 	${CXX} -std=c++20 -I../wasm_include -c ${OTHER_FLAGS} -o $@ $<

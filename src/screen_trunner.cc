@@ -287,8 +287,7 @@ bool TRunnerScreen::update(float dt) {
 
     // Check if clicked on a Walker.
     for (unsigned int idx = 0; idx < walkers.size(); ++idx) {
-      if (auto walker_bb = walkers[idx].get_body_bb();
-          GetRayCollisionBox(ray, walker_bb).hit) {
+      if (GetRayCollisionBox(ray, walkers[idx].get_body_bb()).hit) {
         if (controlled_walker_idx.has_value()) {
           walkers[controlled_walker_idx.value()].set_player_controlled(false);
         }
@@ -345,8 +344,7 @@ bool TRunnerScreen::update(float dt) {
         }
       };
 
-      if (auto bb_collision = GetRayCollisionBox(ray, surface_bbs[idx]);
-          bb_collision.hit) {
+      if (GetRayCollisionBox(ray, surface_bbs[idx]).hit) {
         if (auto collision = GetRayCollisionTriangle(ray, nw, sw, ne);
             collision.hit) {
           on_collide_fn(collision.point);

@@ -98,7 +98,7 @@ class Walker {
 
 template <std::size_t BBCount>
 void Walker::update(float dt, const std::array<BoundingBox, BBCount> &bbs,
-                    unsigned int width, unsigned int height) {
+                    unsigned int width, unsigned int /*height*/) {
   if ((flags & 8) == 0 && (flags & 4) != 0 && (flags & 3) == 0) {
     roaming_timer += dt;
     if (roaming_timer > roaming_time) {

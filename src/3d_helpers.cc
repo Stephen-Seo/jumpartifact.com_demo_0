@@ -127,7 +127,7 @@ Matrix operator*(const Matrix &a, const Matrix &b) {
 }
 
 bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out) {
-  if (ray.direction.y == 0.0F) {
+  if (FloatEquals(ray.direction.y, 0.0F)) {
     return false;
   }
   // y = 0 -> amount to set ray.dir to set ray.pos to zero
@@ -147,13 +147,18 @@ bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out) {
 std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
   // Ray dir and plane normal.
   float rd_pn = Vector3DotProduct(ray.direction, plane.direction);
-  if (rd_pn == 0.0F) {
+  if (FloatEquals(rd_pn, 0.0F)) {
     return std::nullopt;
   }
 
   float amount = (Vector3DotProduct(plane.position, plane.direction) -
                   Vector3DotProduct(ray.position, plane.direction)) /
                  rd_pn;
+
+  // Negative amount means collision in opposite direction of ray.
+  if (amount < 0.0F) {
+    return std::nullopt;
+  }
 
   // Amount * ray_dir + ray_pos == plane intersection.
   return Vector3{ray.position.x + ray.direction.x * amount,

@@ -21,6 +21,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
       surface_bbs(),
+      // NOLINTBEGIN(bugprone-integer-division)
       walkers{Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
                      (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
 
@@ -33,9 +34,8 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
 
               Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
                      (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET,
-                     true}
-
-      },
+                     true}},
+      // NOLINTEND(bugprone-integer-division)
       camera{Vector3{0.0F, 1.0F, 0.5F}, Vector3{0.0F, 0.0F, 0.0F},
              Vector3{0.0F, 1.0F, 0.0F}, 80.0F, CAMERA_PERSPECTIVE},
       flags(),

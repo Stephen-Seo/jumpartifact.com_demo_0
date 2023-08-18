@@ -1,7 +1,7 @@
 ifdef RELEASE
 	OTHER_FLAGS = -DNDEBUG -O3
 else
-	OTHER_FLAGS = -O0
+	OTHER_FLAGS = -Og
 endif
 
 SOURCES = \

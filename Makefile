@@ -1,5 +1,5 @@
 ifdef DEBUG
-	COMMON_FLAGS = -g -O0
+	COMMON_FLAGS = -g -Og
 else
 	COMMON_FLAGS = -DNDEBUG -O3
 endif

@@ -28,7 +28,7 @@ HEADERS = \
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst ..,PREVDIR,$(subst .cc,.cc.o,${SOURCES})))
 
-CXX = source ${HOME}/git/emsdk/emsdk_env.sh && em++
+CXX = source ${HOME}/git/emsdk/emsdk_env.sh &>/dev/null && em++
 
 all: | format jumpartifact.com_demo_0.html
 

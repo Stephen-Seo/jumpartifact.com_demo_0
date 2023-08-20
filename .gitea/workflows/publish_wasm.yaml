@@ -1,6 +1,9 @@
 name: Build and Publish WASM version of demo
 run-name: ${{ gitea.actor }} is building the WASM version
-on: [push]
+on:
+  push:
+    branches:
+      - 'main'
 
 jobs:
   Build-And-Deploy:

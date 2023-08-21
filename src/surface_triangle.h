@@ -55,17 +55,11 @@ surface_to_triangles(const std::array<SurfaceUnitOptT, ASize> &surface,
     triangles->at(toffset) = SurfaceTriangle(
         Vector3{0.5F, surface_unit.ne, -0.5F},
         Vector3{-0.5F, surface_unit.nw, -0.5F},
-        Vector3{-0.5F, surface_unit.sw, 0.5F},
-        Vector3{posx,
-                (surface_unit.ne + surface_unit.nw + surface_unit.sw) / 3.0F,
-                posz});
+        Vector3{-0.5F, surface_unit.sw, 0.5F}, Vector3{posx, 0.0F, posz});
     triangles->at(toffset + 1) = SurfaceTriangle(
         Vector3{0.5F, surface_unit.ne, -0.5F},
         Vector3{-0.5F, surface_unit.sw, 0.5F},
-        Vector3{0.5F, surface_unit.se, 0.5F},
-        Vector3{posx,
-                (surface_unit.ne + surface_unit.sw + surface_unit.se) / 3.0F,
-                posz});
+        Vector3{0.5F, surface_unit.se, 0.5F}, Vector3{posx, 0.0F, posz});
   }
 
   return triangles;

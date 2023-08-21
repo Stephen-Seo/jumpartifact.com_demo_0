@@ -13,6 +13,7 @@
 
 // local includes
 #include "common_constants.h"
+#include "surface_triangle.h"
 #include "walker.h"
 
 constexpr float POS_VALUE_INC_RATE = 0.2F;
@@ -22,8 +23,16 @@ constexpr float SURFACE_HEIGHT_INTERVAL = 0.7F;
 
 constexpr int BUTTON_FONT_SIZE = 30;
 
+constexpr float SURFACE_RESET_TIME = 4.0F;
+constexpr float SURFACE_RESET_TIME_TRI_DRAW = 3.0F;
+constexpr float SURFACE_RESET_Y_OFFSET = 40.0F;
+
 class TRunnerScreen : public Screen {
  public:
+  struct SurfaceUnit {
+    float nw, ne, sw, se;
+  };
+
   TRunnerScreen(std::weak_ptr<ScreenStack> stack);
   ~TRunnerScreen() override;
 
@@ -47,24 +56,26 @@ class TRunnerScreen : public Screen {
     PIXEL_WHITE
   };
 
-  struct SurfaceUnit {
-    float nw, ne, sw, se;
-  };
-
   static Color PixelToColor(Pixel p);
 
   std::array<std::optional<SurfaceUnit>,
              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
       surface;
   std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
-
+  std::array<SurfaceTriangle, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT * 2>
+      surface_triangles;
   std::array<Walker, 4> walkers;
 
   Camera3D camera;
+  /*
+   * 0 - resetting surface
+   */
   std::bitset<64> flags;
   Model TEMP_cube_model;
   Texture2D TEMP_cube_texture;
   Matrix TEMP_matrix;
+  RenderTexture2D bgRenderTexture;
+  RenderTexture2D fgRenderTexture;
   Vector3 camera_pos;
   Vector3 camera_target;
   Vector3 mouse_hit;
@@ -73,9 +84,12 @@ class TRunnerScreen : public Screen {
   const int left_text_width;
   const int right_text_width;
   const int forward_text_width;
+  const int reset_surface_text_width;
+  float surface_reset_anim_timer;
 
   void camera_to_targets(float dt);
   void generate_surface();
+  void generate_surface_with_triangles();
 };
 
 #endif

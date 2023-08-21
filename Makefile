@@ -18,7 +18,8 @@ SOURCES = \
 		src/3d_helpers.cc \
 		src/raymath.cc \
 		src/ems.cc \
-		src/walker.cc
+		src/walker.cc \
+		src/surface_triangle.cc
 
 HEADERS = \
 		src/game.h \
@@ -27,7 +28,8 @@ HEADERS = \
 		src/screen_trunner.h \
 		src/3d_helpers.h \
 		src/ems.h \
-		src/walker.h
+		src/walker.h \
+		src/surface_triangle.h
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst .cc,.cc.o,${SOURCES}))
 

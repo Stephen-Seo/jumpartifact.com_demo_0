@@ -6,6 +6,7 @@
 // standard library includes
 #include <array>
 #include <bitset>
+#include <memory>
 #include <optional>
 
 // third party includes
@@ -62,8 +63,6 @@ class TRunnerScreen : public Screen {
              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
       surface;
   std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
-  std::array<SurfaceTriangle, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT * 2>
-      surface_triangles;
   std::array<Walker, 4> walkers;
 
   Camera3D camera;
@@ -79,6 +78,9 @@ class TRunnerScreen : public Screen {
   Vector3 camera_pos;
   Vector3 camera_target;
   Vector3 mouse_hit;
+  std::unique_ptr<std::array<SurfaceTriangle,
+                             SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT * 2> >
+      surface_triangles;
   unsigned int idx_hit;
   std::optional<unsigned int> controlled_walker_idx;
   const int left_text_width;

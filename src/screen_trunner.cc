@@ -247,7 +247,7 @@ post_check_click:
     if (surface_reset_anim_timer > SURFACE_RESET_TIME) {
       flags.reset(0);
     } else {
-      for (auto &tri : surface_triangles) {
+      for (auto &tri : *surface_triangles) {
         tri.update(dt);
       }
     }
@@ -335,9 +335,9 @@ bool TRunnerScreen::draw() {
         unsigned char alpha =
             ((1.0F - surface_reset_anim_timer / SURFACE_RESET_TIME_TRI_DRAW) *
              255.0F);
-        surface_triangles.at(x * 2 + y * SURFACE_UNIT_WIDTH * 2)
+        surface_triangles->at(x * 2 + y * SURFACE_UNIT_WIDTH * 2)
             .draw(Color{color.r, color.g, color.b, alpha});
-        surface_triangles.at(x * 2 + 1 + y * SURFACE_UNIT_WIDTH * 2)
+        surface_triangles->at(x * 2 + 1 + y * SURFACE_UNIT_WIDTH * 2)
             .draw(Color{color.r, color.g, color.b, alpha});
       }
     }

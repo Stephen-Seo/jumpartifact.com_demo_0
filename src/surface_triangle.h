@@ -3,6 +3,7 @@
 
 // standard library includes
 #include <array>
+#include <memory>
 
 // third party includes
 #include <raylib.h>
@@ -29,10 +30,11 @@ struct SurfaceTriangle {
 };
 
 template <typename SurfaceUnitOptT, std::size_t ASize>
-extern std::array<SurfaceTriangle, ASize * 2> surface_to_triangles(
-    const std::array<SurfaceUnitOptT, ASize> &surface,
-    const std::size_t width) {
-  std::array<SurfaceTriangle, ASize * 2> triangles;
+extern std::unique_ptr<std::array<SurfaceTriangle, ASize * 2> >
+surface_to_triangles(const std::array<SurfaceUnitOptT, ASize> &surface,
+                     const std::size_t width) {
+  std::unique_ptr<std::array<SurfaceTriangle, ASize * 2> > triangles =
+      std::make_unique<std::array<SurfaceTriangle, ASize * 2> >();
 
   for (std::size_t idx = 0; idx < ASize; ++idx) {
     std::size_t x = idx % width;
@@ -44,20 +46,20 @@ extern std::array<SurfaceTriangle, ASize * 2> surface_to_triangles(
     std::size_t toffset = x * 2 + y * width * 2;
 
     if (!surface[idx].has_value()) {
-      triangles.at(toffset) = SurfaceTriangle();
-      triangles.at(toffset + 1) = SurfaceTriangle();
+      triangles->at(toffset) = SurfaceTriangle();
+      triangles->at(toffset + 1) = SurfaceTriangle();
       continue;
     }
 
     const auto &surface_unit = surface[idx].value();
-    triangles.at(toffset) = SurfaceTriangle(
+    triangles->at(toffset) = SurfaceTriangle(
         Vector3{0.5F, surface_unit.ne, -0.5F},
         Vector3{-0.5F, surface_unit.nw, -0.5F},
         Vector3{-0.5F, surface_unit.sw, 0.5F},
         Vector3{posx,
                 (surface_unit.ne + surface_unit.nw + surface_unit.sw) / 3.0F,
                 posz});
-    triangles.at(toffset + 1) = SurfaceTriangle(
+    triangles->at(toffset + 1) = SurfaceTriangle(
         Vector3{0.5F, surface_unit.ne, -0.5F},
         Vector3{-0.5F, surface_unit.sw, 0.5F},
         Vector3{0.5F, surface_unit.se, 0.5F},

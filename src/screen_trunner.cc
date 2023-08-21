@@ -21,7 +21,6 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
       surface_bbs(),
-      surface_triangles(),
       // NOLINTBEGIN(bugprone-integer-division)
       walkers{Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
                      (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
@@ -48,6 +47,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       camera_pos{0.0F, 4.0F, 4.0F},
       camera_target{0.0F, 0.0F, 0.0F},
       mouse_hit{0.0F, 0.0F, 0.0F},
+      surface_triangles(),
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
               (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH),
       controlled_walker_idx(std::nullopt),

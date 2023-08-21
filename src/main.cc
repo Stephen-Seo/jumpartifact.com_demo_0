@@ -52,6 +52,7 @@ int main() {
   {
     Game game{};
     SetTargetFPS(60);
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
 
     while (!WindowShouldClose()) {
       jumpartifact_demo_update(&game);

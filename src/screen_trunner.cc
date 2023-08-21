@@ -246,6 +246,7 @@ post_check_click:
     surface_reset_anim_timer += dt;
     if (surface_reset_anim_timer > SURFACE_RESET_TIME) {
       flags.reset(0);
+      surface_triangles.reset();
     } else {
       for (auto &tri : *surface_triangles) {
         tri.update(dt);

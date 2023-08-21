@@ -75,6 +75,7 @@ class TRunnerScreen : public Screen {
   const int forward_text_width;
 
   void camera_to_targets(float dt);
+  void generate_surface();
 };
 
 #endif

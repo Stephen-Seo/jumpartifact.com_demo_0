@@ -61,157 +61,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
                               translate_matrix_y(0.5F);
 
   // Initialize surface.
-#ifndef NDEBUG
-  std::cout << "Initializing surface...\n";
-#endif
-  std::queue<unsigned int> to_update;
-  to_update.push(SURFACE_UNIT_WIDTH / 2 +
-                 (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH);
-  while (!to_update.empty()) {
-    unsigned int idx = to_update.front();
-    to_update.pop();
-    if (surface.at(idx).has_value()) {
-      continue;
-    }
-    SurfaceUnit current{0.0F, 0.0F, 0.0F, 0.0F};
-    // 0000 0001 - nw set
-    // 0000 0010 - ne set
-    // 0000 0100 - sw set
-    // 0000 1000 - se set
-    unsigned char flags = 0;
-
-    // Check adjacent.
-    if (idx % SURFACE_UNIT_WIDTH > 0) {
-      if (surface.at(idx - 1).has_value()) {
-        if ((flags & 1) == 0) {
-          current.nw = surface.at(idx - 1).value().ne;
-          flags |= 1;
-        }
-        if ((flags & 4) == 0) {
-          current.sw = surface.at(idx - 1).value().se;
-          flags |= 4;
-        }
-      } else {
-        to_update.push(idx - 1);
-      }
-    }
-    if (idx % SURFACE_UNIT_WIDTH < SURFACE_UNIT_WIDTH - 1) {
-      if (surface.at(idx + 1).has_value()) {
-        if ((flags & 2) == 0) {
-          current.ne = surface.at(idx + 1).value().nw;
-          flags |= 2;
-        }
-        if ((flags & 8) == 0) {
-          current.se = surface.at(idx + 1).value().sw;
-          flags |= 8;
-        }
-      } else {
-        to_update.push(idx + 1);
-      }
-    }
-    if (idx / SURFACE_UNIT_WIDTH > 0) {
-      if (surface.at(idx - SURFACE_UNIT_WIDTH).has_value()) {
-        if ((flags & 1) == 0) {
-          current.nw = surface.at(idx - SURFACE_UNIT_WIDTH).value().sw;
-          flags |= 1;
-        }
-        if ((flags & 2) == 0) {
-          current.ne = surface.at(idx - SURFACE_UNIT_WIDTH).value().se;
-          flags |= 2;
-        }
-      } else {
-        to_update.push(idx - SURFACE_UNIT_WIDTH);
-      }
-    }
-    if (idx / SURFACE_UNIT_WIDTH < SURFACE_UNIT_HEIGHT - 1) {
-      if (surface.at(idx + SURFACE_UNIT_WIDTH).has_value()) {
-        if ((flags & 4) == 0) {
-          current.sw = surface.at(idx + SURFACE_UNIT_WIDTH).value().nw;
-          flags |= 4;
-        }
-        if ((flags & 8) == 0) {
-          current.se = surface.at(idx + SURFACE_UNIT_WIDTH).value().ne;
-          flags |= 8;
-        }
-      } else {
-        to_update.push(idx + SURFACE_UNIT_WIDTH);
-      }
-    }
-
-    // Calculate remaining values.
-    float avg = 0.0F;
-    unsigned int count = 0;
-    if ((flags & 1) != 0) {
-      avg += current.nw;
-      ++count;
-    }
-    if ((flags & 2) != 0) {
-      avg += current.ne;
-      ++count;
-    }
-    if ((flags & 4) != 0) {
-      avg += current.sw;
-      ++count;
-    }
-    if ((flags & 8) != 0) {
-      avg += current.se;
-      ++count;
-    }
-    if (count != 0) {
-      avg = avg / (float)count;
-    }
-
-    if ((flags & 1) == 0) {
-      current.nw = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
-                   SURFACE_HEIGHT_INTERVAL / 2.0F;
-    }
-    if ((flags & 2) == 0) {
-      current.ne = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
-                   SURFACE_HEIGHT_INTERVAL / 2.0F;
-    }
-    if ((flags & 4) == 0) {
-      current.sw = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
-                   SURFACE_HEIGHT_INTERVAL / 2.0F;
-    }
-    if ((flags & 8) == 0) {
-      current.se = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
-                   SURFACE_HEIGHT_INTERVAL / 2.0F;
-    }
-
-    surface.at(idx) = current;
-
-    // Calculate bounding boxes.
-    int x = idx % SURFACE_UNIT_WIDTH;
-    int y = idx / SURFACE_UNIT_WIDTH;
-    float xf = (float)(x)-SURFACE_X_OFFSET;
-    float zf = (float)(y)-SURFACE_Y_OFFSET;
-    surface_bbs.at(idx).min.x = xf - 0.5F;
-    surface_bbs.at(idx).min.z = zf - 0.5F;
-    surface_bbs.at(idx).max.x = xf + 0.5F;
-    surface_bbs.at(idx).max.z = zf + 0.5F;
-
-    surface_bbs.at(idx).min.y = current.nw;
-    if (current.ne < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.ne;
-    }
-    if (current.sw < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.sw;
-    }
-    if (current.se < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.se;
-    }
-
-    surface_bbs.at(idx).max.y = current.nw;
-    if (current.ne > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.ne;
-    }
-    if (current.sw > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.sw;
-    }
-    if (current.se > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.se;
-    }
-  }
+  generate_surface();
 
 #ifndef NDEBUG
   std::cout << "Screen finished init.\n";
@@ -488,4 +338,161 @@ void TRunnerScreen::camera_to_targets(float dt) {
       (camera_target.y - camera.target.y) * CAMERA_UPDATE_RATE * dt;
   camera.target.z +=
       (camera_target.z - camera.target.z) * CAMERA_UPDATE_RATE * dt;
+}
+
+void TRunnerScreen::generate_surface() {
+  for (auto &su : surface) {
+    su = std::nullopt;
+  }
+#ifndef NDEBUG
+  std::cout << "Initializing surface...\n";
+#endif
+  std::queue<unsigned int> to_update;
+  to_update.push(SURFACE_UNIT_WIDTH / 2 +
+                 (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH);
+  while (!to_update.empty()) {
+    unsigned int idx = to_update.front();
+    to_update.pop();
+    if (surface.at(idx).has_value()) {
+      continue;
+    }
+    SurfaceUnit current{0.0F, 0.0F, 0.0F, 0.0F};
+    // 0000 0001 - nw set
+    // 0000 0010 - ne set
+    // 0000 0100 - sw set
+    // 0000 1000 - se set
+    unsigned char flags = 0;
+
+    // Check adjacent.
+    if (idx % SURFACE_UNIT_WIDTH > 0) {
+      if (surface.at(idx - 1).has_value()) {
+        if ((flags & 1) == 0) {
+          current.nw = surface.at(idx - 1).value().ne;
+          flags |= 1;
+        }
+        if ((flags & 4) == 0) {
+          current.sw = surface.at(idx - 1).value().se;
+          flags |= 4;
+        }
+      } else {
+        to_update.push(idx - 1);
+      }
+    }
+    if (idx % SURFACE_UNIT_WIDTH < SURFACE_UNIT_WIDTH - 1) {
+      if (surface.at(idx + 1).has_value()) {
+        if ((flags & 2) == 0) {
+          current.ne = surface.at(idx + 1).value().nw;
+          flags |= 2;
+        }
+        if ((flags & 8) == 0) {
+          current.se = surface.at(idx + 1).value().sw;
+          flags |= 8;
+        }
+      } else {
+        to_update.push(idx + 1);
+      }
+    }
+    if (idx / SURFACE_UNIT_WIDTH > 0) {
+      if (surface.at(idx - SURFACE_UNIT_WIDTH).has_value()) {
+        if ((flags & 1) == 0) {
+          current.nw = surface.at(idx - SURFACE_UNIT_WIDTH).value().sw;
+          flags |= 1;
+        }
+        if ((flags & 2) == 0) {
+          current.ne = surface.at(idx - SURFACE_UNIT_WIDTH).value().se;
+          flags |= 2;
+        }
+      } else {
+        to_update.push(idx - SURFACE_UNIT_WIDTH);
+      }
+    }
+    if (idx / SURFACE_UNIT_WIDTH < SURFACE_UNIT_HEIGHT - 1) {
+      if (surface.at(idx + SURFACE_UNIT_WIDTH).has_value()) {
+        if ((flags & 4) == 0) {
+          current.sw = surface.at(idx + SURFACE_UNIT_WIDTH).value().nw;
+          flags |= 4;
+        }
+        if ((flags & 8) == 0) {
+          current.se = surface.at(idx + SURFACE_UNIT_WIDTH).value().ne;
+          flags |= 8;
+        }
+      } else {
+        to_update.push(idx + SURFACE_UNIT_WIDTH);
+      }
+    }
+
+    // Calculate remaining values.
+    float avg = 0.0F;
+    unsigned int count = 0;
+    if ((flags & 1) != 0) {
+      avg += current.nw;
+      ++count;
+    }
+    if ((flags & 2) != 0) {
+      avg += current.ne;
+      ++count;
+    }
+    if ((flags & 4) != 0) {
+      avg += current.sw;
+      ++count;
+    }
+    if ((flags & 8) != 0) {
+      avg += current.se;
+      ++count;
+    }
+    if (count != 0) {
+      avg = avg / (float)count;
+    }
+
+    if ((flags & 1) == 0) {
+      current.nw = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
+                   SURFACE_HEIGHT_INTERVAL / 2.0F;
+    }
+    if ((flags & 2) == 0) {
+      current.ne = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
+                   SURFACE_HEIGHT_INTERVAL / 2.0F;
+    }
+    if ((flags & 4) == 0) {
+      current.sw = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
+                   SURFACE_HEIGHT_INTERVAL / 2.0F;
+    }
+    if ((flags & 8) == 0) {
+      current.se = avg + call_js_get_random() * SURFACE_HEIGHT_INTERVAL -
+                   SURFACE_HEIGHT_INTERVAL / 2.0F;
+    }
+
+    surface.at(idx) = current;
+
+    // Calculate bounding boxes.
+    int x = idx % SURFACE_UNIT_WIDTH;
+    int y = idx / SURFACE_UNIT_WIDTH;
+    float xf = (float)(x)-SURFACE_X_OFFSET;
+    float zf = (float)(y)-SURFACE_Y_OFFSET;
+    surface_bbs.at(idx).min.x = xf - 0.5F;
+    surface_bbs.at(idx).min.z = zf - 0.5F;
+    surface_bbs.at(idx).max.x = xf + 0.5F;
+    surface_bbs.at(idx).max.z = zf + 0.5F;
+
+    surface_bbs.at(idx).min.y = current.nw;
+    if (current.ne < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.ne;
+    }
+    if (current.sw < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.sw;
+    }
+    if (current.se < surface_bbs.at(idx).min.y) {
+      surface_bbs.at(idx).min.y = current.se;
+    }
+
+    surface_bbs.at(idx).max.y = current.nw;
+    if (current.ne > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.ne;
+    }
+    if (current.sw > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.sw;
+    }
+    if (current.se > surface_bbs.at(idx).max.y) {
+      surface_bbs.at(idx).max.y = current.se;
+    }
+  }
 }

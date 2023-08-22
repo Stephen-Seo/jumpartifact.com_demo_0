@@ -321,6 +321,8 @@ bool TRunnerScreen::draw() {
       int total_width = 0;
       DrawRectangle(0, GetScreenHeight() - BUTTON_FONT_SIZE, left_text_width,
                     BUTTON_FONT_SIZE, Color{255, 255, 255, 180});
+      DrawRectangleLines(0, GetScreenHeight() - BUTTON_FONT_SIZE,
+                         left_text_width, BUTTON_FONT_SIZE, GREEN);
       DrawText("Left", 0, GetScreenHeight() - BUTTON_FONT_SIZE,
                BUTTON_FONT_SIZE, BLACK);
 
@@ -328,6 +330,8 @@ bool TRunnerScreen::draw() {
       DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
                     right_text_width, BUTTON_FONT_SIZE,
                     Color{255, 255, 255, 180});
+      DrawRectangleLines(total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
+                         right_text_width, BUTTON_FONT_SIZE, GREEN);
       DrawText("Right", total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
                BUTTON_FONT_SIZE, BLACK);
 
@@ -336,6 +340,8 @@ bool TRunnerScreen::draw() {
       DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
                     forward_text_width, BUTTON_FONT_SIZE,
                     Color{255, 255, 255, 180});
+      DrawRectangleLines(total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
+                         forward_text_width, BUTTON_FONT_SIZE, GREEN);
       DrawText("Forward", total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
                BUTTON_FONT_SIZE, BLACK);
     }
@@ -343,6 +349,8 @@ bool TRunnerScreen::draw() {
     DrawRectangle(GetScreenWidth() - reset_surface_text_width, 0,
                   reset_surface_text_width, BUTTON_FONT_SIZE,
                   Color{255, 255, 255, 180});
+    DrawRectangleLines(GetScreenWidth() - reset_surface_text_width, 0,
+                       reset_surface_text_width, BUTTON_FONT_SIZE, GREEN);
     DrawText("Reset Surface", GetScreenWidth() - reset_surface_text_width, 0,
              BUTTON_FONT_SIZE, BLACK);
   }

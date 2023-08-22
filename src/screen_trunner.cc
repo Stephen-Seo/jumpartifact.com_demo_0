@@ -315,11 +315,43 @@ bool TRunnerScreen::draw() {
   }
 
   EndMode3D();
+
+  if (!flags.test(0)) {
+    if (controlled_walker_idx.has_value()) {
+      int total_width = 0;
+      DrawRectangle(0, GetScreenHeight() - BUTTON_FONT_SIZE, left_text_width,
+                    BUTTON_FONT_SIZE, Color{255, 255, 255, 180});
+      DrawText("Left", 0, GetScreenHeight() - BUTTON_FONT_SIZE,
+               BUTTON_FONT_SIZE, BLACK);
+
+      total_width += left_text_width;
+      DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
+                    right_text_width, BUTTON_FONT_SIZE,
+                    Color{255, 255, 255, 180});
+      DrawText("Right", total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
+               BUTTON_FONT_SIZE, BLACK);
+
+      total_width =
+          (total_width + right_text_width) / 2 - forward_text_width / 2;
+      DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
+                    forward_text_width, BUTTON_FONT_SIZE,
+                    Color{255, 255, 255, 180});
+      DrawText("Forward", total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
+               BUTTON_FONT_SIZE, BLACK);
+    }
+
+    DrawRectangle(GetScreenWidth() - reset_surface_text_width, 0,
+                  reset_surface_text_width, BUTTON_FONT_SIZE,
+                  Color{255, 255, 255, 180});
+    DrawText("Reset Surface", GetScreenWidth() - reset_surface_text_width, 0,
+             BUTTON_FONT_SIZE, BLACK);
+  }
+
   EndTextureMode();
 
-  BeginTextureMode(fgRenderTexture);
-  ClearBackground(Color{0, 0, 0, 0});
   if (flags.test(0)) {
+    BeginTextureMode(fgRenderTexture);
+    ClearBackground(Color{0, 0, 0, 0});
     BeginMode3D(camera);
     for (unsigned int idx = 0; idx < SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
          ++idx) {
@@ -343,49 +375,21 @@ bool TRunnerScreen::draw() {
       }
     }
     EndMode3D();
+
+    EndTextureMode();
   }
-
-  if (controlled_walker_idx.has_value()) {
-    int total_width = 0;
-    DrawRectangle(0, GetScreenHeight() - BUTTON_FONT_SIZE, left_text_width,
-                  BUTTON_FONT_SIZE, Color{255, 255, 255, 180});
-    DrawText("Left", 0, GetScreenHeight() - BUTTON_FONT_SIZE, BUTTON_FONT_SIZE,
-             BLACK);
-
-    total_width += left_text_width;
-    DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
-                  right_text_width, BUTTON_FONT_SIZE,
-                  Color{255, 255, 255, 180});
-    DrawText("Right", total_width, GetScreenHeight() - BUTTON_FONT_SIZE,
-             BUTTON_FONT_SIZE, BLACK);
-
-    total_width = (total_width + right_text_width) / 2 - forward_text_width / 2;
-    DrawRectangle(total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
-                  forward_text_width, BUTTON_FONT_SIZE,
-                  Color{255, 255, 255, 180});
-    DrawText("Forward", total_width, GetScreenHeight() - BUTTON_FONT_SIZE * 2,
-             BUTTON_FONT_SIZE, BLACK);
-  }
-
-  if (!flags.test(0)) {
-    DrawRectangle(GetScreenWidth() - reset_surface_text_width, 0,
-                  reset_surface_text_width, BUTTON_FONT_SIZE,
-                  Color{255, 255, 255, 180});
-    DrawText("Reset Surface", GetScreenWidth() - reset_surface_text_width, 0,
-             BUTTON_FONT_SIZE, BLACK);
-  }
-
-  EndTextureMode();
 
   BeginDrawing();
   DrawTextureRec(
       bgRenderTexture.texture,
       Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
       {0, 0}, WHITE);
-  DrawTextureRec(
-      fgRenderTexture.texture,
-      Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
-      {0, 0}, WHITE);
+  if (flags.test(0)) {
+    DrawTextureRec(
+        fgRenderTexture.texture,
+        Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
+        {0, 0}, WHITE);
+  }
   EndDrawing();
 
   return false;

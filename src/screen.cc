@@ -62,7 +62,8 @@ void ScreenStack::update(float dt) {
 }
 
 void ScreenStack::draw() {
-  for (auto idx = 0; idx < size.size() && stack.at(idx)->draw(); ++idx) {
+  for (decltype(stack.size()) idx = 0;
+       idx < stack.size() && stack.at(idx)->draw(); ++idx) {
   }
 }
 

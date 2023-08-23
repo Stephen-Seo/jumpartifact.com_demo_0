@@ -1,8 +1,6 @@
 #ifndef JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 #define JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 
-#include <raylib.h>
-
 #include <deque>
 #include <functional>
 #include <memory>

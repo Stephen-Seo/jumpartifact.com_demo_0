@@ -37,8 +37,8 @@ class TRunnerScreen : public Screen {
   TRunnerScreen(std::weak_ptr<ScreenStack> stack);
   ~TRunnerScreen() override;
 
-  bool update(float dt) override;
-  bool draw() override;
+  bool update(float dt, bool is_resized) override;
+  bool draw(RenderTexture *render_texture) override;
 
  private:
   enum Pixel : unsigned char {
@@ -68,6 +68,7 @@ class TRunnerScreen : public Screen {
   Camera3D camera;
   /*
    * 0 - resetting surface
+   * 1 - walker hack attempted
    */
   std::bitset<64> flags;
   Model TEMP_cube_model;
@@ -88,6 +89,7 @@ class TRunnerScreen : public Screen {
   const int forward_text_width;
   const int reset_surface_text_width;
   float surface_reset_anim_timer;
+  bool walker_hack_success;
 
   void camera_to_targets(float dt);
   void generate_surface();

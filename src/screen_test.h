@@ -8,8 +8,8 @@ class TestScreen : public Screen {
   TestScreen(ScreenStack::Weak weak_ptr);
   ~TestScreen() override;
 
-  bool update(float dt) override;
-  bool draw() override;
+  bool update(float dt, bool is_resized) override;
+  bool draw(RenderTexture *render_texture) override;
 
  private:
   float TEMP_cached_dt;

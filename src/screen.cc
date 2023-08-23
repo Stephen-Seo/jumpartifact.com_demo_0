@@ -1,6 +1,8 @@
 #include "screen.h"
 
 // standard library includes
+#include <raylib.h>
+
 #include <cassert>
 #ifndef NDEBUG
 #include <iostream>
@@ -45,8 +47,18 @@ ScreenStack::Ptr ScreenStack::new_instance() {
   return ptr;
 }
 
+ScreenStack::~ScreenStack() {
+  UnloadRenderTexture(*render_texture);
+  render_texture.reset();
+}
+
 void ScreenStack::update(float dt) {
   handle_pending_actions();
+
+  bool resized = IsWindowResized();
+  if (resized) {
+    reset_render_texture();
+  }
 
   auto idx = stack.size();
   if (idx == 0) {
@@ -57,14 +69,21 @@ void ScreenStack::update(float dt) {
     update(dt);
     return;
   }
-  while (idx > 0 && stack.at(--idx)->update(dt)) {
+  while (idx > 0 && stack.at(--idx)->update(dt, resized)) {
   }
 }
 
 void ScreenStack::draw() {
   for (decltype(stack.size()) idx = 0;
-       idx < stack.size() && stack.at(idx)->draw(); ++idx) {
+       idx < stack.size() && stack.at(idx)->draw(render_texture.get()); ++idx) {
   }
+
+  BeginDrawing();
+  DrawTextureRec(
+      render_texture->texture,
+      Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
+      {0, 0}, WHITE);
+  EndDrawing();
 }
 
 void ScreenStack::push_screen(Screen::Ptr &&screen) {
@@ -79,7 +98,16 @@ void ScreenStack::clear_screens() {
   actions.push_back(PendingAction(Action::CLEAR_SCREENS));
 }
 
-ScreenStack::ScreenStack() : self_weak(), stack(), actions() {}
+void ScreenStack::reset_render_texture() {
+  UnloadRenderTexture(*render_texture);
+
+  *render_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+}
+
+ScreenStack::ScreenStack()
+    : render_texture(new RenderTexture), self_weak(), stack(), actions() {
+  *render_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+}
 
 void ScreenStack::handle_pending_actions() {
   while (!actions.empty()) {

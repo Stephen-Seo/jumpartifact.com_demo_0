@@ -16,6 +16,7 @@
 // local includes
 #include "3d_helpers.h"
 #include "ems.h"
+#include "screen_walker_hack.h"
 
 TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
@@ -55,7 +56,8 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       right_text_width(MeasureText("Right", BUTTON_FONT_SIZE)),
       forward_text_width(MeasureText("Forward", BUTTON_FONT_SIZE)),
       reset_surface_text_width(MeasureText("Reset Surface", BUTTON_FONT_SIZE)),
-      surface_reset_anim_timer(0.0F) {
+      surface_reset_anim_timer(0.0F),
+      walker_hack_success(false) {
 #ifndef NDEBUG
   std::cout << "idx_hit initialized to " << idx_hit << std::endl;
 #endif
@@ -85,13 +87,22 @@ TRunnerScreen::~TRunnerScreen() {
   UnloadModel(TEMP_cube_model);
 }
 
-bool TRunnerScreen::update(float dt) {
-  if (IsWindowResized()) {
+bool TRunnerScreen::update(float dt, bool is_resized) {
+  if (is_resized) {
     UnloadRenderTexture(fgRenderTexture);
     UnloadRenderTexture(bgRenderTexture);
 
     bgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     fgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+  }
+
+  if (flags.test(1)) {
+    if (walker_hack_success && controlled_walker_idx.has_value()) {
+      walkers[controlled_walker_idx.value()].set_player_controlled(true);
+    } else {
+      controlled_walker_idx.reset();
+    }
+    flags.reset(1);
   }
 
   if (controlled_walker_idx.has_value()) {
@@ -173,7 +184,13 @@ bool TRunnerScreen::update(float dt) {
             walkers[controlled_walker_idx.value()].set_player_controlled(false);
           }
           controlled_walker_idx = idx;
-          walkers[controlled_walker_idx.value()].set_player_controlled(true);
+          auto s_stack = stack.lock();
+          if (s_stack) {
+            s_stack->push_constructing_screen_args<WalkerHackScreen>(
+                &walker_hack_success);
+            flags.set(1);
+          }
+          // walkers[controlled_walker_idx.value()].set_player_controlled(true);
 
           idx_hit = SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
 
@@ -264,7 +281,7 @@ post_check_click:
   return false;
 }
 
-bool TRunnerScreen::draw() {
+bool TRunnerScreen::draw(RenderTexture *render_texture) {
   BeginTextureMode(bgRenderTexture);
   ClearBackground(PixelToColor(Pixel::PIXEL_SKY));
   BeginMode3D(camera);
@@ -317,7 +334,7 @@ bool TRunnerScreen::draw() {
   EndMode3D();
 
   if (!flags.test(0)) {
-    if (controlled_walker_idx.has_value()) {
+    if (!flags.test(1) && controlled_walker_idx.has_value()) {
       int total_width = 0;
       DrawRectangle(0, GetScreenHeight() - BUTTON_FONT_SIZE, left_text_width,
                     BUTTON_FONT_SIZE, Color{255, 255, 255, 180});
@@ -387,7 +404,7 @@ bool TRunnerScreen::draw() {
     EndTextureMode();
   }
 
-  BeginDrawing();
+  BeginTextureMode(*render_texture);
   DrawTextureRec(
       bgRenderTexture.texture,
       Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
@@ -398,9 +415,9 @@ bool TRunnerScreen::draw() {
         Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},
         {0, 0}, WHITE);
   }
-  EndDrawing();
+  EndTextureMode();
 
-  return false;
+  return true;
 }
 
 Color TRunnerScreen::PixelToColor(Pixel p) {

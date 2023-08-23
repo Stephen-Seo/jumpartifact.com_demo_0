@@ -1,14 +1,17 @@
 #ifndef JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 #define JUMPARTIFACT_DOT_COM_DEMO_0_SCREEN_H_
 
+#include <raylib.h>
+
 #include <deque>
 #include <functional>
 #include <memory>
 #include <variant>
 #include <vector>
 
-// Forward declaration.
+// Forward declarations.
 class ScreenStack;
+struct RenderTexture;
 
 class Screen {
  public:
@@ -16,6 +19,9 @@ class Screen {
 
   template <typename SubScreen>
   static Ptr new_screen(std::weak_ptr<ScreenStack> stack);
+
+  template <typename SubScreen, typename... Args>
+  static Ptr new_screen_args(std::weak_ptr<ScreenStack> stack, Args... args);
 
   virtual ~Screen() {}
 
@@ -28,9 +34,9 @@ class Screen {
   Screen& operator=(Screen&&) = default;
 
   /// Return true if next screen should be updated.
-  virtual bool update(float dt) = 0;
+  virtual bool update(float dt, bool screen_resized) = 0;
   /// Return true if next screen should be drawn.
-  virtual bool draw() = 0;
+  virtual bool draw(RenderTexture* renderTexture) = 0;
 
  protected:
   Screen(std::weak_ptr<ScreenStack> stack);
@@ -67,6 +73,8 @@ class ScreenStack {
  public:
   static Ptr new_instance();
 
+  ~ScreenStack();
+
   // No copy.
   ScreenStack(const ScreenStack&) = delete;
   ScreenStack& operator=(const ScreenStack&) = delete;
@@ -86,15 +94,21 @@ class ScreenStack {
   template <typename SubScreen>
   void push_constructing_screen();
 
+  template <typename SubScreen, typename... Args>
+  void push_constructing_screen_args(Args... args);
+
   void pop_screen();
 
   void clear_screens();
+
+  void reset_render_texture();
 
  private:
   ScreenStack();
 
   void handle_pending_actions();
 
+  std::unique_ptr<RenderTexture> render_texture;
   Weak self_weak;
   std::vector<Screen::Ptr> stack;
   std::deque<PendingAction> actions;
@@ -103,6 +117,12 @@ class ScreenStack {
 template <typename SubScreen>
 Screen::Ptr Screen::new_screen(std::weak_ptr<ScreenStack> stack) {
   return std::unique_ptr<SubScreen>(new SubScreen{stack});
+}
+
+template <typename SubScreen, typename... Args>
+Screen::Ptr Screen::new_screen_args(std::weak_ptr<ScreenStack> stack,
+                                    Args... args) {
+  return std::unique_ptr<SubScreen>(new SubScreen{stack, args...});
 }
 
 template <typename SubScreen>
@@ -114,6 +134,13 @@ template <typename SubScreen>
 void ScreenStack::push_constructing_screen() {
   actions.emplace_back([](ScreenStack::Weak ss) -> Screen::Ptr {
     return Screen::new_screen<SubScreen>(ss);
+  });
+}
+
+template <typename SubScreen, typename... Args>
+void ScreenStack::push_constructing_screen_args(Args... args) {
+  actions.emplace_back([args...](ScreenStack::Weak ss) -> Screen::Ptr {
+    return Screen::new_screen_args<SubScreen>(ss, args...);
   });
 }
 

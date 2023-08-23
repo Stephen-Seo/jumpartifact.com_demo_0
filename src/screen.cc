@@ -62,8 +62,7 @@ void ScreenStack::update(float dt) {
 }
 
 void ScreenStack::draw() {
-  auto idx = stack.size();
-  while (idx > 0 && stack.at(--idx)->draw()) {
+  for (auto idx = 0; idx < size.size() && stack.at(idx)->draw(); ++idx) {
   }
 }
 

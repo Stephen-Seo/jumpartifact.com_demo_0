@@ -1,12 +1,13 @@
 #include "screen.h"
 
 // standard library includes
-#include <raylib.h>
-
 #include <cassert>
 #ifndef NDEBUG
 #include <iostream>
 #endif  // NDEBUG
+
+// third party includes
+#include <raylib.h>
 
 // local includes
 #include "screen_test.h"

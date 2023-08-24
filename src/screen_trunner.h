@@ -29,6 +29,8 @@ constexpr float SURFACE_RESET_TIME = 4.0F;
 constexpr float SURFACE_RESET_TIME_TRI_DRAW = 3.0F;
 constexpr float SURFACE_RESET_Y_OFFSET = 40.0F;
 
+constexpr int ELECTRICITY_EFFECT_LINE_COUNT = 50;
+
 class TRunnerScreen : public Screen {
  public:
   struct SurfaceUnit {

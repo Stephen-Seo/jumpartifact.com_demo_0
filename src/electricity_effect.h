@@ -7,7 +7,6 @@
 // third party includes
 #include <raylib.h>
 
-constexpr int CYLINDER_SUB_COUNT_MAX = 3;
 constexpr int CYLINDER_SPLIT_COUNT = 3;
 constexpr int CYLINDER_SIDES = 3;
 constexpr float CYLINDER_MAX_RADIUS = 0.03F;

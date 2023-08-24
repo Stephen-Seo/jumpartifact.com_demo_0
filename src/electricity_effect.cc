@@ -1,5 +1,8 @@
 #include "electricity_effect.h"
 
+// standard library includes
+#include <queue>
+
 // third party includes
 #include <raylib.h>
 #include <raymath.h>
@@ -18,54 +21,28 @@ ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
   cylinders.reserve(line_count);
 
   // Generate cylinders.
-  int sub_count = 0;
-  Vector3 dir, pos;
-  for (; line_count > 0; --line_count) {
-    if (sub_count == 0) {
-      dir.x = call_js_get_random() * 2.0F - 1.0F;
-      dir.y = call_js_get_random() * 2.0F - 1.0F;
-      dir.z = call_js_get_random() * 2.0F - 1.0F;
+  std::queue<Vector3> positions;
+  Vector3 next, dir;
+  for (unsigned int idx = 0; idx < CYLINDER_SPLIT_COUNT; ++idx) {
+    positions.push(center);
+  }
+  while (line_count-- > 0 && !positions.empty()) {
+    next = positions.front();
+    positions.pop();
 
-      dir = Vector3Normalize(dir);
+    dir = Vector3Normalize(Vector3{call_js_get_random() * 2.0F - 1.0F,
+                                   call_js_get_random() * 2.0F - 1.0F,
+                                   call_js_get_random() * 2.0F - 1.0F});
 
-      pos = center + dir * (radius * 0.7F);
+    auto coll = GetRayCollisionSphere(Ray{.position = next, .direction = dir},
+                                      center, radius);
 
-      dir.x = call_js_get_random() * 2.0F - 1.0F;
-      dir.y = call_js_get_random() * 2.0F - 1.0F;
-      dir.z = call_js_get_random() * 2.0F - 1.0F;
+    cylinders.push_back(Cylinder{.start = next, .end = coll.point});
 
-      dir = Vector3Normalize(dir);
-
-      auto coll = GetRayCollisionSphere(
-          Ray{.position = center, .direction = dir}, center, radius);
-
-      cylinders.push_back(Cylinder{.start = pos, .end = coll.point});
-
-      pos = coll.point;
-    } else {
-      dir = Vector3Normalize(center - pos);
-
-      pos = pos + dir * (radius * CYLINDER_EDGE_OFFSET);
-
-      for (unsigned int idx = 0; idx < CYLINDER_SPLIT_COUNT; ++idx) {
-        dir.x = call_js_get_random() * 2.0F - 1.0F;
-        dir.y = call_js_get_random() * 2.0F - 1.0F;
-        dir.z = call_js_get_random() * 2.0F - 1.0F;
-
-        dir = Vector3Normalize(dir);
-
-        auto coll = GetRayCollisionSphere(
-            Ray{.position = pos, .direction = dir}, center, radius);
-
-        cylinders.push_back(Cylinder{.start = pos, .end = coll.point});
-
-        if (idx == CYLINDER_SPLIT_COUNT - 1) {
-          pos = coll.point;
-        }
-      }
-    }
-    if (++sub_count >= CYLINDER_SUB_COUNT_MAX) {
-      sub_count = 0;
+    dir = Vector3Normalize(center - coll.point);
+    coll.point = coll.point + dir * (radius * CYLINDER_EDGE_OFFSET);
+    for (unsigned int idx = 0; idx < CYLINDER_SPLIT_COUNT; ++idx) {
+      positions.push(coll.point);
     }
   }
 }

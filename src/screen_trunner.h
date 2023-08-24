@@ -14,6 +14,7 @@
 
 // local includes
 #include "common_constants.h"
+#include "electricity_effect.h"
 #include "surface_triangle.h"
 #include "walker.h"
 
@@ -82,6 +83,7 @@ class TRunnerScreen : public Screen {
   std::unique_ptr<std::array<SurfaceTriangle,
                              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT * 2> >
       surface_triangles;
+  std::vector<ElectricityEffect> electricityEffects;
   unsigned int idx_hit;
   std::optional<unsigned int> controlled_walker_idx;
   const int left_text_width;

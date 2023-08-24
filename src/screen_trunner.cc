@@ -49,6 +49,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       camera_target{0.0F, 0.0F, 0.0F},
       mouse_hit{0.0F, 0.0F, 0.0F},
       surface_triangles(),
+      electricityEffects(),
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
               (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH),
       controlled_walker_idx(std::nullopt),
@@ -99,6 +100,10 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
   if (flags.test(1)) {
     if (walker_hack_success && controlled_walker_idx.has_value()) {
       walkers[controlled_walker_idx.value()].set_player_controlled(true);
+      electricityEffects.push_back(ElectricityEffect(
+          walkers[controlled_walker_idx.value()].get_body_pos(), 1.7F, 15,
+          1.0F));
+
     } else {
       controlled_walker_idx.reset();
     }
@@ -278,6 +283,21 @@ post_check_click:
                   SURFACE_UNIT_HEIGHT);
   }
 
+  std::vector<decltype(electricityEffects.size())> to_remove;
+  for (decltype(electricityEffects.size()) idx = 0;
+       idx < electricityEffects.size(); ++idx) {
+    if (electricityEffects[idx].update(dt)) {
+      to_remove.push_back(idx);
+    }
+  }
+
+  for (auto iter = to_remove.rbegin(); iter != to_remove.rend(); ++iter) {
+    if (*iter != electricityEffects.size() - 1) {
+      electricityEffects[*iter] = *electricityEffects.rbegin();
+    }
+    electricityEffects.pop_back();
+  }
+
   return false;
 }
 
@@ -317,6 +337,10 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
 
   for (auto &walker : walkers) {
     walker.draw(TEMP_cube_model);
+  }
+
+  for (auto &ee : electricityEffects) {
+    ee.draw(GREEN);
   }
 
   // TODO DEBUG

@@ -81,6 +81,6 @@ void ElectricityEffect::draw(Color color) {
 
   for (const auto &cylinder : cylinders) {
     DrawCylinderEx(cylinder.start, cylinder.end, CYLINDER_MAX_RADIUS * ratio,
-                   CYLINDER_MAX_RADIUS * ratio, 8, color);
+                   CYLINDER_MAX_RADIUS * ratio, CYLINDER_SIDES, color);
   }
 }

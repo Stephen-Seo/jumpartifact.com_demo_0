@@ -46,6 +46,7 @@ class WalkerHackScreen : public Screen {
   bool screen_pop_requested;
 
   void set_sizes();
+  void on_success();
 };
 
 #endif

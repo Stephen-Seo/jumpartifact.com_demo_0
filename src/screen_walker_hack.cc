@@ -61,8 +61,7 @@ bool WalkerHackScreen::update(float dt, bool resized) {
                 GetScreenWidth() / 2 - type_f_size - BUTTON_DRAW_OFFSET &&
             GetTouchX() <= GetScreenWidth() / 2 - BUTTON_DRAW_OFFSET &&
             GetTouchY() <= font_size) {
-          *walker_hack_success = true;
-          button_type = BUTTON_TYPE_SIZE;
+          on_success();
         }
         break;
       case BUTTON_TYPE_J:
@@ -70,8 +69,7 @@ bool WalkerHackScreen::update(float dt, bool resized) {
             GetTouchX() <=
                 GetScreenWidth() / 2 + BUTTON_DRAW_OFFSET + type_j_size &&
             GetTouchY() <= font_size) {
-          *walker_hack_success = true;
-          button_type = BUTTON_TYPE_SIZE;
+          on_success();
         }
         break;
       case BUTTON_TYPE_A:
@@ -80,8 +78,7 @@ bool WalkerHackScreen::update(float dt, bool resized) {
             GetTouchX() <= GetScreenWidth() / 2 - BUTTON_DRAW_OFFSET &&
             GetTouchY() >= font_size + BUTTON_DRAW_OFFSET &&
             GetTouchY() <= font_size * 2 + BUTTON_DRAW_OFFSET) {
-          *walker_hack_success = true;
-          button_type = BUTTON_TYPE_SIZE;
+          on_success();
         }
         break;
       case BUTTON_TYPE_L:
@@ -90,8 +87,7 @@ bool WalkerHackScreen::update(float dt, bool resized) {
                 GetScreenWidth() / 2 + BUTTON_DRAW_OFFSET + type_l_size &&
             GetTouchY() >= font_size + BUTTON_DRAW_OFFSET &&
             GetTouchY() <= font_size * 2 + BUTTON_DRAW_OFFSET) {
-          *walker_hack_success = true;
-          button_type = BUTTON_TYPE_SIZE;
+          on_success();
         }
         break;
       default:
@@ -102,26 +98,22 @@ bool WalkerHackScreen::update(float dt, bool resized) {
   switch (GetKeyPressed()) {
     case KEY_F:
       if (button_type == BUTTON_TYPE_F) {
-        *walker_hack_success = true;
-        button_type = BUTTON_TYPE_SIZE;
+        on_success();
       }
       break;
     case KEY_J:
       if (button_type == BUTTON_TYPE_J) {
-        *walker_hack_success = true;
-        button_type = BUTTON_TYPE_SIZE;
+        on_success();
       }
       break;
     case KEY_A:
       if (button_type == BUTTON_TYPE_A) {
-        *walker_hack_success = true;
-        button_type = BUTTON_TYPE_SIZE;
+        on_success();
       }
       break;
     case KEY_L:
       if (button_type == BUTTON_TYPE_L) {
-        *walker_hack_success = true;
-        button_type = BUTTON_TYPE_SIZE;
+        on_success();
       }
       break;
     default:
@@ -190,4 +182,10 @@ void WalkerHackScreen::set_sizes() {
   type_j_size = MeasureText("J", font_size);
   type_a_size = MeasureText("A", font_size);
   type_l_size = MeasureText("L", font_size);
+}
+
+void WalkerHackScreen::on_success() {
+  *walker_hack_success = true;
+  button_type = BUTTON_TYPE_SIZE;
+  timer = -1.0F;
 }

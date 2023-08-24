@@ -27,7 +27,8 @@ WalkerHackScreen::WalkerHackScreen(ScreenStack::Weak ss_weak,
       type_j_size(1),
       type_a_size(1),
       type_l_size(1),
-      button_type(BUTTON_TYPE_F) {
+      button_type(BUTTON_TYPE_F),
+      screen_pop_requested(false) {
   button_type =
       (ButtonType)((int)(call_js_get_random() * (float)BUTTON_TYPE_SIZE));
   *walker_hack_success = false;
@@ -42,14 +43,14 @@ bool WalkerHackScreen::update(float dt, bool resized) {
   }
 
   timer -= dt;
-  if (timer < 0.0F) {
+  if (timer < 0.0F && !screen_pop_requested) {
 #ifndef NDEBUG
     std::clog << "WalkerHackScreen: timer ended.\n";
 #endif
-    timer = WALKER_HACK_SCREEN_DURATION;
     auto s_stack = stack.lock();
     if (s_stack) {
       s_stack->pop_screen();
+      screen_pop_requested = true;
     }
   }
 
@@ -139,9 +140,10 @@ bool WalkerHackScreen::draw(RenderTexture *render_texture) {
            GetScreenWidth() / 2 - instructions_size / 2,
            (GetScreenHeight() / 4) * 3, instructions_font_size, WHITE);
 
-  float ratio =
-      (WALKER_HACK_SCREEN_DURATION - timer) / WALKER_HACK_SCREEN_DURATION;
-  DrawRectangle(GetScreenWidth() * ratio,
+  float ratio = timer > 0.0F ? (WALKER_HACK_SCREEN_DURATION - timer) /
+                                   WALKER_HACK_SCREEN_DURATION
+                             : 1.0F;
+  DrawRectangle(GetScreenWidth() * ratio / 2.0F,
                 (float)GetScreenHeight() * BUTTON_FONT_SIZE_RATIO * 2.0F +
                     BUTTON_DRAW_OFFSET * 3.0F,
                 GetScreenWidth() * (1.0F - ratio), 30, GREEN);

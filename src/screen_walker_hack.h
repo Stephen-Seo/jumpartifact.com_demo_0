@@ -43,6 +43,7 @@ class WalkerHackScreen : public Screen {
   int type_a_size;
   int type_l_size;
   ButtonType button_type;
+  bool screen_pop_requested;
 
   void set_sizes();
 };

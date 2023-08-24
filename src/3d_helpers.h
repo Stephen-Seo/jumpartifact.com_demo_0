@@ -27,6 +27,9 @@ extern bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out);
 /// plane.direction is plane normal, plane.position is position on plane.
 extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 
+extern Vector3 from_edge_to_sphere_random(Vector3 center, Vector3 point,
+                                          float radius);
+
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);

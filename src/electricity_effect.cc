@@ -80,13 +80,8 @@ bool ElectricityEffect::update(float dt) {
     if (Vector3Distance(cylinder.point, center) > radius) {
       cylinder.point =
           cylinder.point - cylinder.mdir * (dt * CYLINDER_MOVE_RATE);
-      Vector3 to_center = center - cylinder.point;
-      Vector3 perpendicular = Vector3Normalize(Vector3Perpendicular(to_center));
-      cylinder.mdir = Vector3Normalize(
-          to_center + Vector3RotateByAxisAngle(perpendicular,
-                                               Vector3Normalize(to_center),
-                                               call_js_get_random() * PI * 2) *
-                          (call_js_get_random() * radius));
+      cylinder.mdir =
+          from_edge_to_sphere_random(center, cylinder.point, radius);
     }
   }
 

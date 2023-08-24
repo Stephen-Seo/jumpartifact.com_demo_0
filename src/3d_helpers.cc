@@ -6,6 +6,9 @@
 // third party includes
 #include <raymath.h>
 
+// local includes
+#include "ems.h"
+
 Matrix get_identity_matrix() {
   return Matrix{1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F,
                 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F};
@@ -164,6 +167,18 @@ std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane) {
   return Vector3{ray.position.x + ray.direction.x * amount,
                  ray.position.y + ray.direction.y * amount,
                  ray.position.z + ray.direction.z * amount};
+}
+
+Vector3 from_edge_to_sphere_random(Vector3 center, Vector3 point,
+                                   float radius) {
+  Vector3 to_center = center - point;
+  Vector3 perpendicular = Vector3Normalize(Vector3Perpendicular(to_center));
+
+  return Vector3Normalize(
+      to_center + Vector3RotateByAxisAngle(perpendicular,
+                                           Vector3Normalize(to_center),
+                                           call_js_get_random() * PI * 2.0F) *
+                      (call_js_get_random() * radius));
 }
 
 Vector3 operator+(const Vector3 &a, const Vector3 &b) {

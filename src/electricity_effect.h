@@ -11,7 +11,8 @@ constexpr int CYLINDER_SPLIT_COUNT = 3;
 constexpr int CYLINDER_SIDES = 3;
 constexpr float CYLINDER_MAX_RADIUS = 0.03F;
 constexpr float CYLINDER_EDGE_OFFSET = 0.01F;
-constexpr float CYLINDER_LINE_MAX_LENGTH = 1.5F;
+constexpr float CYLINDER_LINE_MAX_LENGTH_RATIO = 0.85F;
+constexpr float CYLINDER_MOVE_RATE = 0.05F;
 
 class ElectricityEffect {
  public:
@@ -25,10 +26,13 @@ class ElectricityEffect {
 
  private:
   struct Cylinder {
-    Vector3 start, end;
+    int next_idx;
+    Vector3 point, mdir;
   };
 
   std::vector<Cylinder> cylinders;
+  Vector3 center;
+  float radius;
   float lifetime;
   float timer;
 };

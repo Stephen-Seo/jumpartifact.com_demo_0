@@ -30,6 +30,8 @@ constexpr float SURFACE_RESET_TIME_TRI_DRAW = 3.0F;
 constexpr float SURFACE_RESET_Y_OFFSET = 40.0F;
 
 constexpr int ELECTRICITY_EFFECT_LINE_COUNT = 35;
+constexpr float ELECTRICITY_EFFECT_RADIUS = 2.0F;
+constexpr float ELECTRICITY_EFFECT_LIFETIME = 3.0F;
 
 class TRunnerScreen : public Screen {
  public:

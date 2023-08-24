@@ -101,8 +101,9 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
     if (walker_hack_success && controlled_walker_idx.has_value()) {
       walkers[controlled_walker_idx.value()].set_player_controlled(true);
       electricityEffects.push_back(ElectricityEffect(
-          walkers[controlled_walker_idx.value()].get_body_pos(), 1.7F,
-          ELECTRICITY_EFFECT_LINE_COUNT, 1.0F));
+          walkers[controlled_walker_idx.value()].get_body_pos(),
+          ELECTRICITY_EFFECT_RADIUS, ELECTRICITY_EFFECT_LINE_COUNT,
+          ELECTRICITY_EFFECT_LIFETIME));
 
     } else {
       controlled_walker_idx.reset();

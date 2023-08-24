@@ -13,11 +13,7 @@
 
 ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
                                      int line_count, float lifetime)
-    : cylinders(),
-      center(center),
-      cylinder_radius(CYLINDER_MAX_RADIUS),
-      lifetime(lifetime),
-      timer(0.0F) {
+    : cylinders(), lifetime(lifetime), timer(0.0F) {
   cylinders.reserve(line_count);
 
   // Generate cylinders.

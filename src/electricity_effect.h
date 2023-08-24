@@ -28,8 +28,6 @@ class ElectricityEffect {
   };
 
   std::vector<Cylinder> cylinders;
-  Vector3 center;
-  float cylinder_radius;
   float lifetime;
   float timer;
 };

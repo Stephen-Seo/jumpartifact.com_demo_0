@@ -11,6 +11,7 @@ constexpr int CYLINDER_SPLIT_COUNT = 3;
 constexpr int CYLINDER_SIDES = 3;
 constexpr float CYLINDER_MAX_RADIUS = 0.03F;
 constexpr float CYLINDER_EDGE_OFFSET = 0.01F;
+constexpr float CYLINDER_LINE_MAX_LENGTH = 1.5F;
 
 class ElectricityEffect {
  public:

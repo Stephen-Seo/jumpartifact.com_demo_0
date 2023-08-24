@@ -26,12 +26,19 @@ ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
     next = positions.front();
     positions.pop();
 
+    dir = Vector3Normalize(center - next);
     dir = Vector3Normalize(Vector3{call_js_get_random() * 2.0F - 1.0F,
                                    call_js_get_random() * 2.0F - 1.0F,
-                                   call_js_get_random() * 2.0F - 1.0F});
+                                   call_js_get_random() * 2.0F - 1.0F} +
+                           dir);
 
     auto coll = GetRayCollisionSphere(Ray{.position = next, .direction = dir},
                                       center, radius);
+
+    if (coll.distance > CYLINDER_LINE_MAX_LENGTH) {
+      coll.point =
+          next + Vector3Normalize(coll.point - next) * CYLINDER_LINE_MAX_LENGTH;
+    }
 
     cylinders.push_back(Cylinder{.start = next, .end = coll.point});
 

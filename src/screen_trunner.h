@@ -15,6 +15,7 @@
 // local includes
 #include "common_constants.h"
 #include "electricity_effect.h"
+#include "spark_effect.h"
 #include "surface_triangle.h"
 #include "walker.h"
 
@@ -32,6 +33,11 @@ constexpr float SURFACE_RESET_Y_OFFSET = 40.0F;
 constexpr int ELECTRICITY_EFFECT_LINE_COUNT = 35;
 constexpr float ELECTRICITY_EFFECT_RADIUS = 2.0F;
 constexpr float ELECTRICITY_EFFECT_LIFETIME = 3.0F;
+
+constexpr int SPARK_EFFECT_SPARK_COUNT = 30;
+constexpr float SPARK_EFFECT_RADIUS = 2.0F;
+constexpr float SPARK_EFFECT_XZ_VARIANCE = 0.5F;
+constexpr float SPARK_EFFECT_LIFETIME = ELECTRICITY_EFFECT_LIFETIME;
 
 class TRunnerScreen : public Screen {
  public:
@@ -88,6 +94,7 @@ class TRunnerScreen : public Screen {
                              SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT * 2> >
       surface_triangles;
   std::vector<ElectricityEffect> electricityEffects;
+  std::vector<SparkEffect> sparkEffects;
   unsigned int idx_hit;
   std::optional<unsigned int> controlled_walker_idx;
   const int left_text_width;

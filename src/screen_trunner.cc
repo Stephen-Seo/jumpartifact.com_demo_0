@@ -50,6 +50,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       mouse_hit{0.0F, 0.0F, 0.0F},
       surface_triangles(),
       electricityEffects(),
+      sparkEffects(),
       idx_hit(SURFACE_UNIT_WIDTH / 2 +
               (SURFACE_UNIT_HEIGHT / 2) * SURFACE_UNIT_WIDTH),
       controlled_walker_idx(std::nullopt),
@@ -105,6 +106,10 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
           ELECTRICITY_EFFECT_RADIUS, ELECTRICITY_EFFECT_LINE_COUNT,
           ELECTRICITY_EFFECT_LIFETIME));
 
+      sparkEffects.push_back(
+          SparkEffect(SPARK_EFFECT_SPARK_COUNT, SPARK_EFFECT_LIFETIME,
+                      walkers[controlled_walker_idx.value()].get_body_pos(),
+                      SPARK_EFFECT_XZ_VARIANCE, SPARK_EFFECT_RADIUS));
     } else {
       controlled_walker_idx.reset();
     }
@@ -284,19 +289,38 @@ post_check_click:
                   SURFACE_UNIT_HEIGHT);
   }
 
-  std::vector<decltype(electricityEffects.size())> to_remove;
-  for (decltype(electricityEffects.size()) idx = 0;
-       idx < electricityEffects.size(); ++idx) {
-    if (electricityEffects[idx].update(dt)) {
-      to_remove.push_back(idx);
+  {
+    std::vector<decltype(electricityEffects.size())> to_remove;
+    for (decltype(electricityEffects.size()) idx = 0;
+         idx < electricityEffects.size(); ++idx) {
+      if (electricityEffects[idx].update(dt)) {
+        to_remove.push_back(idx);
+      }
+    }
+
+    for (auto iter = to_remove.rbegin(); iter != to_remove.rend(); ++iter) {
+      if (*iter != electricityEffects.size() - 1) {
+        electricityEffects[*iter] = *electricityEffects.rbegin();
+      }
+      electricityEffects.pop_back();
     }
   }
 
-  for (auto iter = to_remove.rbegin(); iter != to_remove.rend(); ++iter) {
-    if (*iter != electricityEffects.size() - 1) {
-      electricityEffects[*iter] = *electricityEffects.rbegin();
+  {
+    std::vector<decltype(sparkEffects.size())> to_remove;
+    for (decltype(sparkEffects.size()) idx = 0; idx < sparkEffects.size();
+         ++idx) {
+      if (sparkEffects[idx].update(dt)) {
+        to_remove.push_back(idx);
+      }
     }
-    electricityEffects.pop_back();
+
+    for (auto iter = to_remove.rbegin(); iter != to_remove.rend(); ++iter) {
+      if (*iter != sparkEffects.size() - 1) {
+        sparkEffects[*iter] = *sparkEffects.rbegin();
+      }
+      sparkEffects.pop_back();
+    }
   }
 
   return false;
@@ -342,6 +366,10 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
 
   for (auto &ee : electricityEffects) {
     ee.draw(GREEN);
+  }
+
+  for (auto &se : sparkEffects) {
+    se.draw(GREEN);
   }
 
   // TODO DEBUG

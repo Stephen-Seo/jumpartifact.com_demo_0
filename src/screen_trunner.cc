@@ -72,7 +72,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
   // Initialize surface.
   generate_surface();
 
-  // Set up render textures
+  // Set up render textures.
   bgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
   fgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
@@ -365,7 +365,7 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
   }
 
   for (auto &ee : electricityEffects) {
-    ee.draw(GREEN);
+    ee.draw(GREEN, camera.position);
   }
 
   for (auto &se : sparkEffects) {

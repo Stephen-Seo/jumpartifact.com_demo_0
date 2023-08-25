@@ -2,6 +2,7 @@
 #define JUMPARTIFACT_DOT_COM_DEMO_0_3D_HELPERS_H_
 
 // standard library includes
+#include <array>
 #include <optional>
 
 // third party includes
@@ -29,6 +30,21 @@ extern std::optional<Vector3> ray_to_plane(const Ray &ray, const Ray &plane);
 
 extern Vector3 from_edge_to_sphere_random(Vector3 center, Vector3 point,
                                           float radius);
+
+/*
+ * start side
+ * b -- a
+ * |    |
+ * |    |
+ * c -- d
+ * end side
+ *
+ * (Normal facing outwards from screen.)
+ */
+extern std::array<Vector3, 4> get_quad_from_start_end(Vector3 start,
+                                                      Vector3 end,
+                                                      Vector3 normal,
+                                                      float width);
 
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.

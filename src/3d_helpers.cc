@@ -181,6 +181,21 @@ Vector3 from_edge_to_sphere_random(Vector3 center, Vector3 point,
                       (call_js_get_random() * radius));
 }
 
+std::array<Vector3, 4> get_quad_from_start_end(Vector3 start, Vector3 end,
+                                               Vector3 normal, float width) {
+  std::array<Vector3, 4> quad;
+  Vector3 start_to_end = Vector3Normalize(end - start);
+
+  // Normalize just in case "normal" isn't actually a true normal.
+  quad[0] = Vector3Normalize(Vector3CrossProduct(start_to_end, normal));
+  quad[1] = start + quad[0] * (width / 2.0F);
+  quad[2] = end + quad[0] * (width / 2.0F);
+  quad[3] = end - quad[0] * (width / 2.0F);
+  quad[0] = start - quad[0] * (width / 2.0F);
+
+  return quad;
+}
+
 Vector3 operator+(const Vector3 &a, const Vector3 &b) {
   return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
 }

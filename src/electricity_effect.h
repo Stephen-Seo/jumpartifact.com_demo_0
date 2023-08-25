@@ -7,12 +7,11 @@
 // third party includes
 #include <raylib.h>
 
-constexpr int CYLINDER_SPLIT_COUNT = 3;
-constexpr int CYLINDER_SIDES = 3;
-constexpr float CYLINDER_MAX_RADIUS = 0.03F;
-constexpr float CYLINDER_EDGE_OFFSET = 0.01F;
-constexpr float CYLINDER_LINE_MAX_LENGTH_RATIO = 0.85F;
-constexpr float CYLINDER_MOVE_RATE = 0.05F;
+constexpr int QUAD_SPLIT_COUNT = 3;
+constexpr float QUAD_MAX_WIDTH = 0.06F;
+constexpr float QUAD_EDGE_OFFSET = 0.01F;
+constexpr float QUAD_LINE_MAX_LENGTH_RATIO = 0.85F;
+constexpr float QUAD_MOVE_RATE = 0.05F;
 
 class ElectricityEffect {
  public:
@@ -22,15 +21,15 @@ class ElectricityEffect {
   /// Returns true if lifetime ended.
   bool update(float dt);
   /// Assumes draw mode is active.
-  void draw(Color color);
+  void draw(Color color, Vector3 camera_pos);
 
  private:
-  struct Cylinder {
+  struct EndPoint {
     int next_idx;
     Vector3 point, mdir;
   };
 
-  std::vector<Cylinder> cylinders;
+  std::vector<EndPoint> end_points;
   Vector3 center;
   float radius;
   float lifetime;

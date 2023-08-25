@@ -7,6 +7,8 @@
 SparkEffect::SparkEffect(int count, float lifetime, Vector3 pos,
                          float pos_xz_variance, float radius)
     : sparks(), lifetime(lifetime), timer(0.0F) {
+  sparks.reserve(count);
+
   Vector3 above_pos = pos;
   above_pos.y += radius;
   for (; count > 0; --count) {

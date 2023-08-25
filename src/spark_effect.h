@@ -10,7 +10,7 @@
 constexpr float SPARK_RADIUS = 0.03F;
 constexpr float SPARK_VEL_RATE = 5.0F;
 constexpr float SPARK_VEL_VARIANCE = 1.0F;
-constexpr float SPARK_ACC_RATE = 10.0F;
+constexpr float SPARK_ACC_RATE = 8.0F;
 
 class SparkEffect {
  public:

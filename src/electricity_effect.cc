@@ -1,8 +1,23 @@
 #include "electricity_effect.h"
 
+#ifndef NDEBUG
+#define DEBUG_PRINT_VEC2(v2)                                           \
+  do {                                                                 \
+    std::cout << "Loading " << #v2 << " with value " << (v2).x << ", " \
+              << (v2).y << std::endl;                                  \
+  } while (false);
+#define DEBUG_PRINT_FLOAT(f)                                             \
+  do {                                                                   \
+    std::cout << "Loading " << #f << " with value " << (f) << std::endl; \
+  } while (false);
+#endif
+
 // standard library includes
 #include <queue>
 #include <tuple>
+#ifndef NDEBUG
+#include <iostream>
+#endif
 
 // third party includes
 #include <raylib.h>
@@ -11,6 +26,8 @@
 // local includes
 #include "3d_helpers.h"
 #include "ems.h"
+
+std::optional<Shader> ElectricityEffect::shader = std::nullopt;
 
 ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
                                      int line_count, float lifetime)
@@ -70,6 +87,11 @@ ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
       positions.push({coll.point, end_points.size() - 1});
     }
   }
+
+  // Update shader height if not initialized.
+  if (!shader.has_value()) {
+    update_shader_height();
+  }
 }
 
 bool ElectricityEffect::update(float dt) {
@@ -88,16 +110,154 @@ bool ElectricityEffect::update(float dt) {
   return timer >= lifetime;
 }
 
-void ElectricityEffect::draw(Color color, Vector3 camera_pos) {
+void ElectricityEffect::draw(Color color, Camera *camera) {
   float ratio = timer < lifetime ? (1.0F - timer / lifetime) : 0.0F;
+
+  // Update shader values common to all quads.
+  {
+    int colDiffuse = GetShaderLocation(shader.value(), "colDiffuse");
+    Vector4 normalizedColor = ColorNormalize(color);
+    SetShaderValue(shader.value(), colDiffuse, &normalizedColor,
+                   SHADER_UNIFORM_VEC4);
+  }
 
   for (const auto &end_point : end_points) {
     if (end_point.next_idx >= 0) {
       std::array<Vector3, 4> quad = get_quad_from_start_end(
           end_point.point, end_points[end_point.next_idx].point,
-          camera_pos - end_point.point, QUAD_MAX_WIDTH * ratio);
+          camera->position - end_point.point, QUAD_MAX_WIDTH * ratio);
+      Vector2 q0 = GetWorldToScreen(quad[0], *camera);
+      Vector2 q1 = GetWorldToScreen(quad[3], *camera);
+      Vector2 q2 = GetWorldToScreen(quad[1], *camera);
+      Vector2 q3 = GetWorldToScreen(quad[2], *camera);
+      q1 = Vector2Subtract(q0, q1);
+      q3 = Vector2Subtract(q2, q3);
+
+      // Update shader values.
+      update_shader_sides(q0, q1, q2, q3, Vector2Distance(q0, q2));
+
+      // Draw with shader.
+      BeginShaderMode(shader.value());
       DrawTriangle3D(quad[0], quad[1], quad[2], color);
       DrawTriangle3D(quad[0], quad[2], quad[3], color);
+      EndShaderMode();
     }
   }
+}
+
+Shader ElectricityEffect::get_shader() {
+  if (!shader.has_value()) {
+    init_shader();
+  }
+  return shader.value();
+}
+
+void ElectricityEffect::cleanup_shader() {
+  if (shader.has_value()) {
+    UnloadShader(shader.value());
+    shader.reset();
+  }
+}
+
+void ElectricityEffect::update_shader_height() {
+  if (!shader.has_value()) {
+    init_shader();
+  }
+  int uniform_loc = GetShaderLocation(shader.value(), "screen_height");
+  float height = GetScreenHeight();
+  DEBUG_PRINT_FLOAT(height);
+  SetShaderValue(shader.value(), uniform_loc, &height, SHADER_UNIFORM_FLOAT);
+}
+
+void ElectricityEffect::update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
+                                            Vector2 bdir, float width) {
+  if (!shader.has_value()) {
+    init_shader();
+  }
+  int uniform_loc = GetShaderLocation(shader.value(), "sidePosA");
+  DEBUG_PRINT_VEC2(a);
+  SetShaderValue(shader.value(), uniform_loc, &a, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(shader.value(), "sideDirA");
+  DEBUG_PRINT_VEC2(adir);
+  SetShaderValue(shader.value(), uniform_loc, &adir, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(shader.value(), "sidePosB");
+  DEBUG_PRINT_VEC2(b);
+  SetShaderValue(shader.value(), uniform_loc, &b, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(shader.value(), "sideDirB");
+  DEBUG_PRINT_VEC2(bdir);
+  SetShaderValue(shader.value(), uniform_loc, &bdir, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(shader.value(), "width");
+  DEBUG_PRINT_FLOAT(width);
+  SetShaderValue(shader.value(), uniform_loc, &width, SHADER_UNIFORM_FLOAT);
+}
+
+void ElectricityEffect::init_shader() {
+  // Set up electricity shader.
+  // Vertex shader is exactly the same as Raylib's default vertex shader.
+  shader = LoadShaderFromMemory(
+      // vertex
+      "#version 100                       \n"
+      "attribute vec3 vertexPosition;     \n"
+      "attribute vec2 vertexTexCoord;     \n"
+      "attribute vec4 vertexColor;        \n"
+      "varying vec2 fragTexCoord;         \n"
+      "varying vec4 fragColor;            \n"
+      "uniform mat4 mvp;                  \n"
+      "void main()                        \n"
+      "{                                  \n"
+      "    fragTexCoord = vertexTexCoord; \n"
+      "    fragColor = vertexColor;       \n"
+      "    gl_Position = mvp*vec4(vertexPosition, 1.0); \n"
+      "}                                  \n",
+
+      // fragment
+      "#version 100                       \n"
+      "precision mediump float;           \n"
+      "varying vec2 fragTexCoord;         \n"
+      "varying vec4 fragColor;            \n"
+      "uniform sampler2D texture0;        \n"
+      "uniform vec4 colDiffuse;           \n"
+      "uniform float screen_height;       \n"
+      "uniform float width;             \n"
+      "uniform vec2 sidePosA;           \n"
+      "uniform vec2 sideDirA;           \n"
+      "uniform vec2 sidePosB;           \n"
+      "uniform vec2 sideDirB;           \n"
+      "float dot_get_alpha(vec2 pos, vec2 dir, vec2 point) { \n"
+      "  return ((dir.x * point.x + dir.y * point.y)   \n"
+      "             - (dir.x * pos.x + dir.y * pos.y)) \n"
+      "           / (dir.x * dir.x + dir.y * dir.y);   \n"
+      "}                                  \n"
+      "vec2 closest_point(vec2 pos, vec2 dir, vec2 point) { \n"
+      "  return pos + dir * dot_get_alpha(pos, dir, point); \n"
+      "}                                  \n"
+      "void main()                        \n"
+      "{                                  \n"
+      "    vec4 texelColor = texture2D(texture0, fragTexCoord); \n"
+      "    vec4 color = texelColor*colDiffuse*fragColor;      \n"
+      "    vec2 pos = gl_FragCoord.xy;    \n"
+      "    pos.y = screen_height - pos.y; \n"
+      "    vec2 closest = closest_point(sidePosA, sideDirA, pos); \n"
+      "    float distA = distance(pos, closest); \n"
+      "    closest = closest_point(sidePosB, sideDirB, pos); \n"
+      "    float distB = distance(pos, closest); \n"
+      "    float min_dist = width * 0.3;  \n"
+      "    if (min_dist < 0.00001) {      \n"
+      "        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
+      "    } else if (distA < distB) {    \n"
+      "        if (distA < min_dist) {    \n"
+      "            float lerpVal = distA / min_dist; \n"
+      "            gl_FragColor = color * (1.0 - lerpVal) \n"
+      "                    + vec4(1.0, 1.0, 1.0, 1.0) * lerpVal; \n"
+      "        } else {                   \n"
+      "            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); \n"
+      "        }                          \n"
+      "    } else if (distB < min_dist) { \n"
+      "        float lerpVal = distB / min_dist; \n"
+      "        gl_FragColor = color * (1.0 - lerpVal) \n"
+      "                + vec4(1.0, 1.0, 1.0, 1.0) * lerpVal; \n"
+      "    } else {                       \n"
+      "        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); \n"
+      "    }                              \n"
+      "}                                  \n");
 }

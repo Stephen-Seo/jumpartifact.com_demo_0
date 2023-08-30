@@ -2,6 +2,7 @@
 #define JUMPARTIFACT_DOT_COM_DEMO_0_ELECTRICITY_EFFECT_H_
 
 // standard library includes
+#include <optional>
 #include <vector>
 
 // third party includes
@@ -21,7 +22,13 @@ class ElectricityEffect {
   /// Returns true if lifetime ended.
   bool update(float dt);
   /// Assumes draw mode is active.
-  void draw(Color color, Vector3 camera_pos);
+  void draw(Color color, Camera *camera);
+
+  static Shader get_shader();
+  static void cleanup_shader();
+  static void update_shader_height();
+  static void update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
+                                  Vector2 bdir, float width);
 
  private:
   struct EndPoint {
@@ -29,11 +36,14 @@ class ElectricityEffect {
     Vector3 point, mdir;
   };
 
+  static std::optional<Shader> shader;
   std::vector<EndPoint> end_points;
   Vector3 center;
   float radius;
   float lifetime;
   float timer;
+
+  static void init_shader();
 };
 
 #endif

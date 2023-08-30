@@ -76,12 +76,17 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
   bgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
   fgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
+  // Initialize ElectricityEffect shader.
+  ElectricityEffect::update_shader_height();
+
 #ifndef NDEBUG
   std::cout << "Screen finished init.\n";
 #endif
 }
 
 TRunnerScreen::~TRunnerScreen() {
+  ElectricityEffect::cleanup_shader();
+
   UnloadRenderTexture(fgRenderTexture);
   UnloadRenderTexture(bgRenderTexture);
 
@@ -96,6 +101,8 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
 
     bgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     fgRenderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+
+    ElectricityEffect::update_shader_height();
   }
 
   if (flags.test(1)) {
@@ -365,7 +372,7 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
   }
 
   for (auto &ee : electricityEffects) {
-    ee.draw(GREEN, camera.position);
+    ee.draw(GREEN, &camera);
   }
 
   for (auto &se : sparkEffects) {

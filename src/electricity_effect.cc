@@ -10,6 +10,9 @@
   do {                                                                   \
     std::cout << "Loading " << #f << " with value " << (f) << std::endl; \
   } while (false);
+#else
+#define DEBUG_PRINT_VEC2(v2)
+#define DEBUG_PRINT_FLOAT(f)
 #endif
 
 // standard library includes

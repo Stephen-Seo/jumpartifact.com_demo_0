@@ -39,6 +39,10 @@ void jumpartifact_demo_update(void *ud) {
 int main() {
   InitWindow(800, 800, "Demo");
 
+#ifdef NDEBUG
+  SetTraceLogLevel(LOG_WARNING);
+#endif
+
 #ifdef __EMSCRIPTEN__
   Game game{};
 

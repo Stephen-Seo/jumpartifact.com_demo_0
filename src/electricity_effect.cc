@@ -116,14 +116,6 @@ bool ElectricityEffect::update(float dt) {
 void ElectricityEffect::draw(Color color, Camera *camera) {
   float ratio = timer < lifetime ? (1.0F - timer / lifetime) : 0.0F;
 
-  // Update shader values common to all quads.
-  {
-    int colDiffuse = GetShaderLocation(shader.value(), "colDiffuse");
-    Vector4 normalizedColor = ColorNormalize(color);
-    SetShaderValue(shader.value(), colDiffuse, &normalizedColor,
-                   SHADER_UNIFORM_VEC4);
-  }
-
   for (const auto &end_point : end_points) {
     if (end_point.next_idx >= 0) {
       std::array<Vector3, 4> quad = get_quad_from_start_end(
@@ -246,7 +238,7 @@ void ElectricityEffect::init_shader() {
       "    float distB = distance(pos, closest); \n"
       "    float min_dist = width * 0.3;  \n"
       "    if (min_dist < 0.00001) {      \n"
-      "        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
+      "        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); \n"
       "    } else if (distA < distB) {    \n"
       "        if (distA < min_dist) {    \n"
       "            float lerpVal = distA / min_dist; \n"

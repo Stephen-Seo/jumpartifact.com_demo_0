@@ -22,5 +22,6 @@ enum class NeonColor {
 
 extern NeonColor get_random_neon_color();
 extern void set_color_from_neon_color(NeonColor nc, Color *c_out);
+extern void set_color_from_neon_random(Color *c_out);
 
 #endif

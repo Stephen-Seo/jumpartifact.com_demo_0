@@ -109,7 +109,7 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
     if (walker_hack_success && controlled_walker_idx.has_value()) {
       walkers[controlled_walker_idx.value()].set_player_controlled(true);
       Color color;
-      set_color_from_neon_color(get_random_neon_color(), &color);
+      set_color_from_neon_random(&color);
       electricityEffects.push_back(ElectricityEffect(
           walkers[controlled_walker_idx.value()].get_body_pos(),
           ELECTRICITY_EFFECT_RADIUS, ELECTRICITY_EFFECT_LINE_COUNT,

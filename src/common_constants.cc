@@ -39,3 +39,7 @@ void set_color_from_neon_color(NeonColor nc, Color *c_out) {
       break;
   }
 }
+
+void set_color_from_neon_random(Color *c_out) {
+  set_color_from_neon_color(get_random_neon_color(), c_out);
+}

@@ -50,11 +50,13 @@ extern std::array<Vector3, 4> get_quad_from_start_end(Vector3 start,
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);
 
-extern Vector3 operator+(const Vector3 &a, const Vector3 &b);
-extern Vector3 operator-(const Vector3 &a, const Vector3 &b);
+extern Vector3 operator+(Vector3 a, Vector3 b);
+extern Vector3 operator-(Vector3 a, Vector3 b);
 
 extern Vector3 operator*(Vector3 vec3, float factor);
 
 extern Vector3 operator*(Matrix mat, Vector3 vec3);
+
+extern Vector4 operator*(Vector4 a, Vector4 b);
 
 #endif

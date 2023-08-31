@@ -5,8 +5,8 @@
 #include "ems.h"
 
 SparkEffect::SparkEffect(int count, float lifetime, Vector3 pos,
-                         float pos_xz_variance, float radius)
-    : sparks(), lifetime(lifetime), timer(0.0F) {
+                         float pos_xz_variance, float radius, Color color)
+    : sparks(), color(color), lifetime(lifetime), timer(0.0F) {
   sparks.reserve(count);
 
   Vector3 above_pos = pos;
@@ -36,7 +36,7 @@ bool SparkEffect::update(float dt) {
   return timer > lifetime;
 }
 
-void SparkEffect::draw(Color color) {
+void SparkEffect::draw() {
   float ratio = timer < lifetime ? (1.0F - timer / lifetime) : 0.0F;
 
   for (const auto &spark : sparks) {

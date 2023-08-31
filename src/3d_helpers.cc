@@ -196,11 +196,11 @@ std::array<Vector3, 4> get_quad_from_start_end(Vector3 start, Vector3 end,
   return quad;
 }
 
-Vector3 operator+(const Vector3 &a, const Vector3 &b) {
+Vector3 operator+(Vector3 a, Vector3 b) {
   return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
-Vector3 operator-(const Vector3 &a, const Vector3 &b) {
+Vector3 operator-(Vector3 a, Vector3 b) {
   return Vector3{a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
@@ -210,4 +210,8 @@ Vector3 operator*(Vector3 vec3, float factor) {
 
 Vector3 operator*(Matrix mat, Vector3 vec3) {
   return Vector3Transform(vec3, mat);
+}
+
+Vector4 operator*(Vector4 a, Vector4 b) {
+  return Vector4{a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w};
 }

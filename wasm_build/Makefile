@@ -19,7 +19,8 @@ SOURCES = \
 		../src/surface_triangle.cc \
 		../src/screen_walker_hack.cc \
 		../src/electricity_effect.cc \
-		../src/spark_effect.cc
+		../src/spark_effect.cc \
+		../src/common_constants.cc
 
 HEADERS = \
 		../src/ems.h \
@@ -32,7 +33,8 @@ HEADERS = \
 		../src/surface_triangle.h \
 		../src/screen_walker_hack.h \
 		../src/electricity_effect.h \
-		../src/spark_effect.h
+		../src/spark_effect.h \
+		../src/common_constants.h
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst ..,PREVDIR,$(subst .cc,.cc.o,${SOURCES})))
 

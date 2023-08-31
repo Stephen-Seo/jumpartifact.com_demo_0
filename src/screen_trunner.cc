@@ -108,15 +108,17 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
   if (flags.test(1)) {
     if (walker_hack_success && controlled_walker_idx.has_value()) {
       walkers[controlled_walker_idx.value()].set_player_controlled(true);
+      Color color;
+      set_color_from_neon_color(get_random_neon_color(), &color);
       electricityEffects.push_back(ElectricityEffect(
           walkers[controlled_walker_idx.value()].get_body_pos(),
           ELECTRICITY_EFFECT_RADIUS, ELECTRICITY_EFFECT_LINE_COUNT,
-          ELECTRICITY_EFFECT_LIFETIME));
+          ELECTRICITY_EFFECT_LIFETIME, color));
 
       sparkEffects.push_back(
           SparkEffect(SPARK_EFFECT_SPARK_COUNT, SPARK_EFFECT_LIFETIME,
                       walkers[controlled_walker_idx.value()].get_body_pos(),
-                      SPARK_EFFECT_XZ_VARIANCE, SPARK_EFFECT_RADIUS));
+                      SPARK_EFFECT_XZ_VARIANCE, SPARK_EFFECT_RADIUS, color));
     } else {
       controlled_walker_idx.reset();
     }
@@ -372,11 +374,11 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
   }
 
   for (auto &ee : electricityEffects) {
-    ee.draw(GREEN, &camera);
+    ee.draw(&camera);
   }
 
   for (auto &se : sparkEffects) {
-    se.draw(GREEN);
+    se.draw();
   }
 
   // TODO DEBUG

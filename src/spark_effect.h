@@ -15,13 +15,13 @@ constexpr float SPARK_ACC_RATE = 8.0F;
 class SparkEffect {
  public:
   SparkEffect(int count, float lifetime, Vector3 pos, float pos_xz_variance,
-              float radius);
+              float radius, Color color);
 
   /// Returns true if end of lifetime.
   bool update(float dt);
 
   /// Assumes draw mode is active when called.
-  void draw(Color color);
+  void draw();
 
  private:
   struct Spark {
@@ -29,6 +29,7 @@ class SparkEffect {
   };
 
   std::vector<Spark> sparks;
+  Color color;
   float lifetime;
   float timer;
 };

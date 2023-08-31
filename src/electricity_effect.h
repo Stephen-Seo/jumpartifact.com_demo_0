@@ -17,12 +17,12 @@ constexpr float QUAD_MOVE_RATE = 0.05F;
 class ElectricityEffect {
  public:
   ElectricityEffect(Vector3 center, float radius, int line_count,
-                    float lifetime);
+                    float lifetime, Color color);
 
   /// Returns true if lifetime ended.
   bool update(float dt);
   /// Assumes draw mode is active.
-  void draw(Color color, Camera *camera);
+  void draw(Camera *camera);
 
   static Shader get_shader();
   static void cleanup_shader();
@@ -39,6 +39,7 @@ class ElectricityEffect {
   static std::optional<Shader> shader;
   std::vector<EndPoint> end_points;
   Vector3 center;
+  Color color;
   float radius;
   float lifetime;
   float timer;

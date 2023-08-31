@@ -33,9 +33,11 @@
 std::optional<Shader> ElectricityEffect::shader = std::nullopt;
 
 ElectricityEffect::ElectricityEffect(Vector3 center, float radius,
-                                     int line_count, float lifetime)
+                                     int line_count, float lifetime,
+                                     Color color)
     : end_points(),
       center(center),
+      color(color),
       radius(radius),
       lifetime(lifetime),
       timer(0.0F) {
@@ -113,7 +115,7 @@ bool ElectricityEffect::update(float dt) {
   return timer >= lifetime;
 }
 
-void ElectricityEffect::draw(Color color, Camera *camera) {
+void ElectricityEffect::draw(Camera *camera) {
   float ratio = timer < lifetime ? (1.0F - timer / lifetime) : 0.0F;
 
   for (const auto &end_point : end_points) {

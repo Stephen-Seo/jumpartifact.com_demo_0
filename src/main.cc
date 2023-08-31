@@ -16,7 +16,7 @@
 
 #ifdef __EMSCRIPTEN__
 
-extern Game *global_game_ptr;
+extern Game *global_game_ptr = nullptr;
 
 extern "C" {
 

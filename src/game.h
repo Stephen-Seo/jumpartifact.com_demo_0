@@ -22,6 +22,8 @@ class Game {
   void update();
   void draw();
 
+  void clear_screens();
+
  private:
   ScreenStack::Ptr screen_stack;
   std::chrono::steady_clock::time_point prev_time;

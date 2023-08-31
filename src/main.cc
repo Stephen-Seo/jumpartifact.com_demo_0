@@ -15,6 +15,9 @@
 #include "game.h"
 
 #ifdef __EMSCRIPTEN__
+
+extern Game *global_game_ptr = nullptr;
+
 extern "C" {
 
 EM_BOOL resize_event_callback(int event_type, const EmscriptenUiEvent *event,
@@ -25,6 +28,15 @@ EM_BOOL resize_event_callback(int event_type, const EmscriptenUiEvent *event,
   }
   return false;
 }  // resize_event_callback(...)
+
+int EMSCRIPTEN_KEEPALIVE clear_all_screens() {
+  if (global_game_ptr) {
+    global_game_ptr->clear_screens();
+    return 0;
+  }
+  return 1;
+}
+
 }  // extern "C"
 #endif
 
@@ -45,6 +57,8 @@ int main() {
 
 #ifdef __EMSCRIPTEN__
   Game game{};
+
+  global_game_ptr = &game;
 
   SetWindowSize(call_js_get_canvas_width(), call_js_get_canvas_height());
 

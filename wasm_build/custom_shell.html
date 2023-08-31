@@ -59,6 +59,9 @@
       window.onerror = function() {
         console.log("onerror: " + event);
       };
+      function demo0_clear_all_screens() {
+        Module.ccall('clear_all_screens', 'number', [], []);
+      };
     </script>
     {{{ SCRIPT }}}
   </body>

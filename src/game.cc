@@ -21,3 +21,5 @@ void Game::update() {
 }
 
 void Game::draw() { screen_stack->draw(); }
+
+void Game::clear_screens() { screen_stack->clear_screens(); }

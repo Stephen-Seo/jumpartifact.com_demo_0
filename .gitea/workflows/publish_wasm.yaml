@@ -4,9 +4,16 @@ on:
   push:
     branches:
       - 'main'
+      - 'devel'
 
 jobs:
-  Build-And-Deploy:
+  Build-And-Deploy-main:
+    if: github.ref_name == 'main'
     runs-on: archLinux
     steps:
-      - run: cd && ./build_and_deploy_jumpartifact.com_demo_0.sh
+      - run: cd && flock ./build_lock bash ./build_and_deploy_jumpartifact.com_demo_0.sh
+  Build-And-Deploy-devel:
+    if: github.ref_name == 'devel'
+    runs-on: archLinux
+    steps:
+      - run: cd && flock ./build_lock bash ./build_and_deploy_jumpartifact.com_demo_0_devel.sh

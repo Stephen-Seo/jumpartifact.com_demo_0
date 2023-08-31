@@ -23,3 +23,8 @@ void Game::update() {
 void Game::draw() { screen_stack->draw(); }
 
 void Game::clear_screens() { screen_stack->clear_screens(); }
+
+void Game::clear_and_push_trunner() {
+  screen_stack->clear_screens();
+  screen_stack->push_constructing_screen<TRunnerScreen>();
+}

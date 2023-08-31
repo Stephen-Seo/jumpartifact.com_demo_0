@@ -23,6 +23,7 @@ class Game {
   void draw();
 
   void clear_screens();
+  void clear_and_push_trunner();
 
  private:
   ScreenStack::Ptr screen_stack;

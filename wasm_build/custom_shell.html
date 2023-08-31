@@ -60,7 +60,10 @@
         console.log("onerror: " + event);
       };
       function demo0_clear_all_screens() {
-        Module.ccall('clear_all_screens', 'number', [], []);
+        return Module.ccall('clear_all_screens', 'number', [], []);
+      };
+      function demo0_clear_and_push_trunner() {
+        return Module.ccall('clear_and_push_trunner', 'number', [], []);
       };
     </script>
     {{{ SCRIPT }}}

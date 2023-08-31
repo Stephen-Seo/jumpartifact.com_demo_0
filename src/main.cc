@@ -16,7 +16,7 @@
 
 #ifdef __EMSCRIPTEN__
 
-extern Game *global_game_ptr = nullptr;
+extern Game *global_game_ptr;
 
 extern "C" {
 
@@ -32,6 +32,14 @@ EM_BOOL resize_event_callback(int event_type, const EmscriptenUiEvent *event,
 int EMSCRIPTEN_KEEPALIVE clear_all_screens() {
   if (global_game_ptr) {
     global_game_ptr->clear_screens();
+    return 0;
+  }
+  return 1;
+}
+
+int EMSCRIPTEN_KEEPALIVE clear_and_push_trunner() {
+  if (global_game_ptr) {
+    global_game_ptr->clear_and_push_trunner();
     return 0;
   }
   return 1;

@@ -46,6 +46,14 @@ extern std::array<Vector3, 4> get_quad_from_start_end(Vector3 start,
                                                       Vector3 normal,
                                                       float width);
 
+/*
+ * First vertex is the center of the circle.
+ * Every consecutive vertex starting at index 1 is a circle edge c-clockwise.
+ */
+extern std::array<Vector3, 9> get_circle_facing_viewer(Vector3 pos,
+                                                       Vector3 normal,
+                                                       float radius);
+
 // Unimplemented as this function isn't really needed and it exposes some
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);

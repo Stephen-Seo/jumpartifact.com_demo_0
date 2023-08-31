@@ -196,6 +196,42 @@ std::array<Vector3, 4> get_quad_from_start_end(Vector3 start, Vector3 end,
   return quad;
 }
 
+std::array<Vector3, 9> get_circle_facing_viewer(Vector3 pos, Vector3 normal,
+                                                float radius) {
+  std::array<Vector3, 9> vertices;
+
+  vertices[0] = pos;
+
+  // Normalize just in case the normal isn't a unit vector.
+  normal = Vector3Normalize(normal);
+
+  vertices[1] = Vector3Perpendicular(normal) * radius;
+  vertices[2] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 1.0F / 8.0F) +
+      pos;
+  vertices[3] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 2.0F / 8.0F) +
+      pos;
+  vertices[4] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 3.0F / 8.0F) +
+      pos;
+  vertices[5] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 4.0F / 8.0F) +
+      pos;
+  vertices[6] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 5.0F / 8.0F) +
+      pos;
+  vertices[7] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 6.0F / 8.0F) +
+      pos;
+  vertices[8] =
+      Vector3RotateByAxisAngle(vertices[1], normal, PI * 2.0F * 7.0F / 8.0F) +
+      pos;
+  vertices[1] = vertices[1] + pos;
+
+  return vertices;
+}
+
 Vector3 operator+(Vector3 a, Vector3 b) {
   return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
 }

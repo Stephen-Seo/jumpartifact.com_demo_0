@@ -27,8 +27,6 @@ class ElectricityEffect {
   static Shader get_shader();
   static void cleanup_shader();
   static void update_shader_height();
-  static void update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
-                                  Vector2 bdir, float width);
 
  private:
   struct EndPoint {
@@ -44,6 +42,8 @@ class ElectricityEffect {
   float lifetime;
   float timer;
 
+  static void update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
+                                  Vector2 bdir, float width);
   static void init_shader();
 };
 

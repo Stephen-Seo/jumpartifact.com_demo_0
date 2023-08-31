@@ -132,7 +132,7 @@ void ElectricityEffect::draw(Color color, Camera *camera) {
       update_shader_sides(q0, q1, q2, q3, Vector2Distance(q0, q2));
 
       // Draw with shader.
-      BeginShaderMode(shader.value());
+      BeginShaderMode(get_shader());
       DrawTriangle3D(quad[0], quad[1], quad[2], color);
       DrawTriangle3D(quad[0], quad[2], quad[3], color);
       EndShaderMode();
@@ -158,10 +158,10 @@ void ElectricityEffect::update_shader_height() {
   if (!shader.has_value()) {
     init_shader();
   }
-  int uniform_loc = GetShaderLocation(shader.value(), "screen_height");
+  int uniform_loc = GetShaderLocation(get_shader(), "screen_height");
   float height = GetScreenHeight();
   DEBUG_PRINT_FLOAT(height);
-  SetShaderValue(shader.value(), uniform_loc, &height, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(get_shader(), uniform_loc, &height, SHADER_UNIFORM_FLOAT);
 }
 
 void ElectricityEffect::update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
@@ -169,21 +169,21 @@ void ElectricityEffect::update_shader_sides(Vector2 a, Vector2 adir, Vector2 b,
   if (!shader.has_value()) {
     init_shader();
   }
-  int uniform_loc = GetShaderLocation(shader.value(), "sidePosA");
+  int uniform_loc = GetShaderLocation(get_shader(), "sidePosA");
   DEBUG_PRINT_VEC2(a);
-  SetShaderValue(shader.value(), uniform_loc, &a, SHADER_UNIFORM_VEC2);
-  uniform_loc = GetShaderLocation(shader.value(), "sideDirA");
+  SetShaderValue(get_shader(), uniform_loc, &a, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(get_shader(), "sideDirA");
   DEBUG_PRINT_VEC2(adir);
-  SetShaderValue(shader.value(), uniform_loc, &adir, SHADER_UNIFORM_VEC2);
-  uniform_loc = GetShaderLocation(shader.value(), "sidePosB");
+  SetShaderValue(get_shader(), uniform_loc, &adir, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(get_shader(), "sidePosB");
   DEBUG_PRINT_VEC2(b);
-  SetShaderValue(shader.value(), uniform_loc, &b, SHADER_UNIFORM_VEC2);
-  uniform_loc = GetShaderLocation(shader.value(), "sideDirB");
+  SetShaderValue(get_shader(), uniform_loc, &b, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(get_shader(), "sideDirB");
   DEBUG_PRINT_VEC2(bdir);
-  SetShaderValue(shader.value(), uniform_loc, &bdir, SHADER_UNIFORM_VEC2);
-  uniform_loc = GetShaderLocation(shader.value(), "width");
+  SetShaderValue(get_shader(), uniform_loc, &bdir, SHADER_UNIFORM_VEC2);
+  uniform_loc = GetShaderLocation(get_shader(), "width");
   DEBUG_PRINT_FLOAT(width);
-  SetShaderValue(shader.value(), uniform_loc, &width, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(get_shader(), uniform_loc, &width, SHADER_UNIFORM_FLOAT);
 }
 
 void ElectricityEffect::init_shader() {

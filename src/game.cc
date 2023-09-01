@@ -4,6 +4,7 @@
 #include "screen_trunner.h"
 
 // third party includes
+#include <raylib.h>
 #include <raymath.h>
 
 Game::Game()

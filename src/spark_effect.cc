@@ -112,8 +112,6 @@ void SparkEffect::update_shader_uniforms(float radius, Vector2 pos) {
     init_shader();
   }
 
-  // radius *= 100.0F;
-
   int uniform_loc = GetShaderLocation(get_shader(), "spark_radius");
   DEBUG_PRINT_FLOAT(radius);
   SetShaderValue(get_shader(), uniform_loc, &radius, SHADER_UNIFORM_FLOAT);

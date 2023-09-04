@@ -34,6 +34,9 @@ class SparkEffect {
   };
 
   static std::optional<Shader> shader;
+  static int uniform_screen_height;
+  static int uniform_spark_radius;
+  static int uniform_spark_pos;
   std::vector<Spark> sparks;
   Color color;
   float lifetime;

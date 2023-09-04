@@ -35,6 +35,12 @@ class ElectricityEffect {
   };
 
   static std::optional<Shader> shader;
+  static int uniform_screen_height;
+  static int uniform_side_pos_a;
+  static int uniform_side_dir_a;
+  static int uniform_side_pos_b;
+  static int uniform_side_dir_b;
+  static int uniform_width;
   std::vector<EndPoint> end_points;
   Vector3 center;
   Color color;

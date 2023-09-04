@@ -28,6 +28,9 @@
 #include "ems.h"
 
 std::optional<Shader> SparkEffect::shader = std::nullopt;
+int SparkEffect::uniform_screen_height = 0;
+int SparkEffect::uniform_spark_radius = 0;
+int SparkEffect::uniform_spark_pos = 0;
 
 SparkEffect::SparkEffect(int count, float lifetime, Vector3 pos,
                          float pos_xz_variance, float radius, Color color)
@@ -101,10 +104,10 @@ void SparkEffect::update_shader_height() {
   if (!shader.has_value()) {
     init_shader();
   }
-  int uniform_loc = GetShaderLocation(get_shader(), "screen_height");
   float height = GetScreenHeight();
-  DEBUG_PRINT_FLOAT(height);
-  SetShaderValue(get_shader(), uniform_loc, &height, SHADER_UNIFORM_FLOAT);
+  // DEBUG_PRINT_FLOAT(height);
+  SetShaderValue(get_shader(), uniform_screen_height, &height,
+                 SHADER_UNIFORM_FLOAT);
 }
 
 void SparkEffect::update_shader_uniforms(float radius, Vector2 pos) {
@@ -112,12 +115,11 @@ void SparkEffect::update_shader_uniforms(float radius, Vector2 pos) {
     init_shader();
   }
 
-  int uniform_loc = GetShaderLocation(get_shader(), "spark_radius");
-  DEBUG_PRINT_FLOAT(radius);
-  SetShaderValue(get_shader(), uniform_loc, &radius, SHADER_UNIFORM_FLOAT);
-  uniform_loc = GetShaderLocation(get_shader(), "spark_pos");
-  DEBUG_PRINT_VEC2(pos);
-  SetShaderValue(get_shader(), uniform_loc, &pos, SHADER_UNIFORM_VEC2);
+  // DEBUG_PRINT_FLOAT(radius);
+  SetShaderValue(get_shader(), uniform_spark_radius, &radius,
+                 SHADER_UNIFORM_FLOAT);
+  // DEBUG_PRINT_VEC2(pos);
+  SetShaderValue(get_shader(), uniform_spark_pos, &pos, SHADER_UNIFORM_VEC2);
 }
 
 void SparkEffect::init_shader() {
@@ -170,4 +172,7 @@ void SparkEffect::init_shader() {
       "(1.0 - lerpVal); \n"
       "    }                              \n"
       "}                                  \n");
+  uniform_screen_height = GetShaderLocation(shader.value(), "screen_height");
+  uniform_spark_radius = GetShaderLocation(shader.value(), "spark_radius");
+  uniform_spark_pos = GetShaderLocation(shader.value(), "spark_pos");
 }

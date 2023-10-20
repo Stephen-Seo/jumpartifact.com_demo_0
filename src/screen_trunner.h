@@ -70,11 +70,14 @@ class TRunnerScreen : public Screen {
 
   static Color PixelToColor(Pixel p);
 
-  std::array<std::optional<SurfaceUnit>,
-             SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>
-      surface;
-  std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT> surface_bbs;
-  std::array<Walker, 4> walkers;
+  using SurfaceArrT = std::array<std::optional<SurfaceUnit>,
+                                 SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>;
+  std::unique_ptr<SurfaceArrT> surface;
+  using SurfaceBBsArrT =
+      std::array<BoundingBox, SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT>;
+  std::unique_ptr<SurfaceBBsArrT> surface_bbs;
+  using WalkersArrT = std::array<Walker, 4>;
+  std::unique_ptr<WalkersArrT> walkers;
 
   Camera3D camera;
   /*

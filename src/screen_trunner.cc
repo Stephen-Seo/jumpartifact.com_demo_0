@@ -22,21 +22,7 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
       surface_bbs(),
-      // NOLINTBEGIN(bugprone-integer-division)
-      walkers{Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
-                     (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
-
-              Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
-                     (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
-
-              Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
-                     (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET,
-                     true},
-
-              Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
-                     (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET,
-                     true}},
-      // NOLINTEND(bugprone-integer-division)
+      walkers(),
       camera{Vector3{0.0F, 1.0F, 0.5F}, Vector3{0.0F, 0.0F, 0.0F},
              Vector3{0.0F, 1.0F, 0.0F}, 80.0F, CAMERA_PERSPECTIVE},
       flags(),
@@ -60,6 +46,23 @@ TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
       reset_surface_text_width(MeasureText("Reset Surface", BUTTON_FONT_SIZE)),
       surface_reset_anim_timer(0.0F),
       walker_hack_success(false) {
+  surface = std::make_unique<SurfaceArrT>();
+  surface_bbs = std::make_unique<SurfaceBBsArrT>();
+  // NOLINTBEGIN(bugprone-integer-division)
+  walkers = std::make_unique<WalkersArrT>(WalkersArrT{
+      Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
+             (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
+
+      Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
+             (float)(SURFACE_UNIT_HEIGHT / 4) - SURFACE_Y_OFFSET, true},
+
+      Walker{(float)(SURFACE_UNIT_WIDTH / 4) - SURFACE_X_OFFSET,
+             (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET, true},
+
+      Walker{(float)((SURFACE_UNIT_WIDTH / 4) * 3) - SURFACE_X_OFFSET,
+             (float)((SURFACE_UNIT_HEIGHT / 4) * 3) - SURFACE_Y_OFFSET, true}});
+  // NOLINTEND(bugprone-integer-division)
+
 #ifndef NDEBUG
   std::cout << "idx_hit initialized to " << idx_hit << std::endl;
 #endif
@@ -111,17 +114,17 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
 
   if (flags.test(1)) {
     if (walker_hack_success && controlled_walker_idx.has_value()) {
-      walkers[controlled_walker_idx.value()].set_player_controlled(true);
+      (*walkers)[controlled_walker_idx.value()].set_player_controlled(true);
       Color color;
       set_color_from_neon_random(&color);
       electricityEffects.push_back(ElectricityEffect(
-          walkers[controlled_walker_idx.value()].get_body_pos(),
+          (*walkers)[controlled_walker_idx.value()].get_body_pos(),
           ELECTRICITY_EFFECT_RADIUS, ELECTRICITY_EFFECT_LINE_COUNT,
           ELECTRICITY_EFFECT_LIFETIME, color));
 
       sparkEffects.push_back(
           SparkEffect(SPARK_EFFECT_SPARK_COUNT, SPARK_EFFECT_LIFETIME,
-                      walkers[controlled_walker_idx.value()].get_body_pos(),
+                      (*walkers)[controlled_walker_idx.value()].get_body_pos(),
                       SPARK_EFFECT_XZ_VARIANCE, SPARK_EFFECT_RADIUS, color));
     } else {
       controlled_walker_idx.reset();
@@ -131,37 +134,38 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
 
   if (controlled_walker_idx.has_value()) {
     auto walker_body_pos =
-        walkers[controlled_walker_idx.value()].get_body_pos();
+        (*walkers)[controlled_walker_idx.value()].get_body_pos();
 
     camera_target = walker_body_pos + Vector3{0.0F, 1.0F, 0.0F};
 
-    float rotation = walkers[controlled_walker_idx.value()].get_rotation();
+    float rotation = (*walkers)[controlled_walker_idx.value()].get_rotation();
 
     Vector3 offset = get_rotation_matrix_about_y(rotation + PI) *
                          Vector3{1.0F, 0.0F, 0.0F} * 4.0F +
                      Vector3{0.0F, 4.0F, 0.0F};
 
-    camera_pos = walkers[controlled_walker_idx.value()].get_body_pos() + offset;
+    camera_pos =
+        (*walkers)[controlled_walker_idx.value()].get_body_pos() + offset;
   }
 
   if (!flags.test(0)) {
     if (controlled_walker_idx.has_value() && IsMouseButtonDown(0)) {
       // Check if clicked on button.
-      if (!walkers[controlled_walker_idx.value()].player_is_turning_left() &&
+      if (!(*walkers)[controlled_walker_idx.value()].player_is_turning_left() &&
           GetTouchX() >= 0 && GetTouchX() <= left_text_width &&
           GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
           GetTouchY() <= GetScreenHeight()) {
-        walkers[controlled_walker_idx.value()].player_turn_left();
+        (*walkers)[controlled_walker_idx.value()].player_turn_left();
         goto post_check_click;
-      } else if (!walkers[controlled_walker_idx.value()]
+      } else if (!(*walkers)[controlled_walker_idx.value()]
                       .player_is_turning_right() &&
                  GetTouchX() >= left_text_width &&
                  GetTouchX() <= left_text_width + right_text_width &&
                  GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE &&
                  GetTouchY() <= GetScreenHeight()) {
-        walkers[controlled_walker_idx.value()].player_turn_right();
+        (*walkers)[controlled_walker_idx.value()].player_turn_right();
         goto post_check_click;
-      } else if (!walkers[controlled_walker_idx.value()]
+      } else if (!(*walkers)[controlled_walker_idx.value()]
                       .player_is_going_forward()) {
         if (int width_mid = (left_text_width + right_text_width) / 2 -
                             forward_text_width / 2;
@@ -169,13 +173,13 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
             GetTouchX() <= width_mid + forward_text_width &&
             GetTouchY() >= GetScreenHeight() - BUTTON_FONT_SIZE * 2 &&
             GetTouchY() <= GetScreenHeight() - BUTTON_FONT_SIZE) {
-          walkers[controlled_walker_idx.value()].player_go_forward();
+          (*walkers)[controlled_walker_idx.value()].player_go_forward();
           goto post_check_click;
         }
       }
     } else if (IsMouseButtonReleased(0)) {
       if (controlled_walker_idx.has_value()) {
-        walkers[controlled_walker_idx.value()].player_idle();
+        (*walkers)[controlled_walker_idx.value()].player_idle();
         goto post_check_click;
       }
     }
@@ -202,10 +206,11 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
 #endif
 
       // Check if clicked on a Walker.
-      for (unsigned int idx = 0; idx < walkers.size(); ++idx) {
-        if (GetRayCollisionBox(ray, walkers[idx].get_body_bb()).hit) {
+      for (unsigned int idx = 0; idx < walkers->size(); ++idx) {
+        if (GetRayCollisionBox(ray, (*walkers)[idx].get_body_bb()).hit) {
           if (controlled_walker_idx.has_value()) {
-            walkers[controlled_walker_idx.value()].set_player_controlled(false);
+            (*walkers)[controlled_walker_idx.value()].set_player_controlled(
+                false);
           }
           controlled_walker_idx = idx;
           auto s_stack = stack.lock();
@@ -214,7 +219,7 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
                 &walker_hack_success);
             flags.set(1);
           }
-          // walkers[controlled_walker_idx.value()].set_player_controlled(true);
+          // (*walkers)[controlled_walker_idx.value()].set_player_controlled(true);
 
           idx_hit = SURFACE_UNIT_WIDTH * SURFACE_UNIT_HEIGHT;
 
@@ -230,7 +235,7 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
         float xf = (float)(x)-SURFACE_X_OFFSET;
         float zf = (float)(y)-SURFACE_Y_OFFSET;
 
-        const auto &current = surface[idx].value();
+        const auto &current = (*surface)[idx].value();
         Vector3 nw{xf - 0.5F, current.nw, zf - 0.5F};
         Vector3 ne{xf + 0.5F, current.ne, zf - 0.5F};
         Vector3 sw{xf - 0.5F, current.sw, zf + 0.5F};
@@ -260,13 +265,13 @@ bool TRunnerScreen::update(float dt, bool is_resized) {
           }
           this->camera_target.y += 1.0F;
           if (this->controlled_walker_idx.has_value()) {
-            this->walkers[this->controlled_walker_idx.value()]
+            (*this->walkers)[this->controlled_walker_idx.value()]
                 .set_player_controlled(false);
             this->controlled_walker_idx = std::nullopt;
           }
         };
 
-        if (GetRayCollisionBox(ray, surface_bbs[idx]).hit) {
+        if (GetRayCollisionBox(ray, (*surface_bbs)[idx]).hit) {
           if (auto collision = GetRayCollisionTriangle(ray, nw, sw, ne);
               collision.hit) {
             on_collide_fn(collision.point);
@@ -297,8 +302,8 @@ post_check_click:
 
   camera_to_targets(dt);
 
-  for (auto &walker : walkers) {
-    walker.update(flags.test(0) ? 0.0F : dt, surface_bbs, SURFACE_UNIT_WIDTH,
+  for (auto &walker : *walkers) {
+    walker.update(flags.test(0) ? 0.0F : dt, (*surface_bbs), SURFACE_UNIT_WIDTH,
                   SURFACE_UNIT_HEIGHT);
   }
 
@@ -356,7 +361,7 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
                       ? RAYWHITE
                       : Color{(unsigned char)(200 + ox * 2),
                               (unsigned char)(150 + oy * 2), 20, 255};
-    const auto &current = surface[idx].value();
+    const auto &current = (*surface)[idx].value();
     float reset_y_offset = 0.0F;
     if (flags.test(0)) {
       reset_y_offset = (1.0F - std::sin(surface_reset_anim_timer /
@@ -373,7 +378,7 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
                    color);
   }
 
-  for (auto &walker : walkers) {
+  for (auto &walker : *walkers) {
     walker.draw(TEMP_cube_model);
   }
 
@@ -389,7 +394,7 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
   if (!controlled_walker_idx.has_value() && !flags.test(0)) {
     DrawLine3D(Vector3{0.0F, 3.0F, 0.0F}, mouse_hit, BLACK);
 
-    for (const auto &walker : walkers) {
+    for (const auto &walker : *walkers) {
       BoundingBox bb = walker.get_body_bb();
       bb.min = bb.min - Vector3{0.001F, 0.001F, 0.001F};
       bb.max = bb.max + Vector3{0.001F, 0.001F, 0.001F};
@@ -537,7 +542,7 @@ void TRunnerScreen::camera_to_targets(float dt) {
 }
 
 void TRunnerScreen::generate_surface() {
-  for (auto &su : surface) {
+  for (auto &su : *surface) {
     su = std::nullopt;
   }
 #ifndef NDEBUG
@@ -549,7 +554,7 @@ void TRunnerScreen::generate_surface() {
   while (!to_update.empty()) {
     unsigned int idx = to_update.front();
     to_update.pop();
-    if (surface.at(idx).has_value()) {
+    if (surface->at(idx).has_value()) {
       continue;
     }
     SurfaceUnit current{0.0F, 0.0F, 0.0F, 0.0F};
@@ -561,13 +566,13 @@ void TRunnerScreen::generate_surface() {
 
     // Check adjacent.
     if (idx % SURFACE_UNIT_WIDTH > 0) {
-      if (surface.at(idx - 1).has_value()) {
+      if (surface->at(idx - 1).has_value()) {
         if ((flags & 1) == 0) {
-          current.nw = surface.at(idx - 1).value().ne;
+          current.nw = surface->at(idx - 1).value().ne;
           flags |= 1;
         }
         if ((flags & 4) == 0) {
-          current.sw = surface.at(idx - 1).value().se;
+          current.sw = surface->at(idx - 1).value().se;
           flags |= 4;
         }
       } else {
@@ -575,13 +580,13 @@ void TRunnerScreen::generate_surface() {
       }
     }
     if (idx % SURFACE_UNIT_WIDTH < SURFACE_UNIT_WIDTH - 1) {
-      if (surface.at(idx + 1).has_value()) {
+      if (surface->at(idx + 1).has_value()) {
         if ((flags & 2) == 0) {
-          current.ne = surface.at(idx + 1).value().nw;
+          current.ne = surface->at(idx + 1).value().nw;
           flags |= 2;
         }
         if ((flags & 8) == 0) {
-          current.se = surface.at(idx + 1).value().sw;
+          current.se = surface->at(idx + 1).value().sw;
           flags |= 8;
         }
       } else {
@@ -589,13 +594,13 @@ void TRunnerScreen::generate_surface() {
       }
     }
     if (idx / SURFACE_UNIT_WIDTH > 0) {
-      if (surface.at(idx - SURFACE_UNIT_WIDTH).has_value()) {
+      if (surface->at(idx - SURFACE_UNIT_WIDTH).has_value()) {
         if ((flags & 1) == 0) {
-          current.nw = surface.at(idx - SURFACE_UNIT_WIDTH).value().sw;
+          current.nw = surface->at(idx - SURFACE_UNIT_WIDTH).value().sw;
           flags |= 1;
         }
         if ((flags & 2) == 0) {
-          current.ne = surface.at(idx - SURFACE_UNIT_WIDTH).value().se;
+          current.ne = surface->at(idx - SURFACE_UNIT_WIDTH).value().se;
           flags |= 2;
         }
       } else {
@@ -603,13 +608,13 @@ void TRunnerScreen::generate_surface() {
       }
     }
     if (idx / SURFACE_UNIT_WIDTH < SURFACE_UNIT_HEIGHT - 1) {
-      if (surface.at(idx + SURFACE_UNIT_WIDTH).has_value()) {
+      if (surface->at(idx + SURFACE_UNIT_WIDTH).has_value()) {
         if ((flags & 4) == 0) {
-          current.sw = surface.at(idx + SURFACE_UNIT_WIDTH).value().nw;
+          current.sw = surface->at(idx + SURFACE_UNIT_WIDTH).value().nw;
           flags |= 4;
         }
         if ((flags & 8) == 0) {
-          current.se = surface.at(idx + SURFACE_UNIT_WIDTH).value().ne;
+          current.se = surface->at(idx + SURFACE_UNIT_WIDTH).value().ne;
           flags |= 8;
         }
       } else {
@@ -657,44 +662,44 @@ void TRunnerScreen::generate_surface() {
                    SURFACE_HEIGHT_INTERVAL / 2.0F;
     }
 
-    surface.at(idx) = current;
+    surface->at(idx) = current;
 
     // Calculate bounding boxes.
     int x = idx % SURFACE_UNIT_WIDTH;
     int y = idx / SURFACE_UNIT_WIDTH;
     float xf = (float)(x)-SURFACE_X_OFFSET;
     float zf = (float)(y)-SURFACE_Y_OFFSET;
-    surface_bbs.at(idx).min.x = xf - 0.5F;
-    surface_bbs.at(idx).min.z = zf - 0.5F;
-    surface_bbs.at(idx).max.x = xf + 0.5F;
-    surface_bbs.at(idx).max.z = zf + 0.5F;
+    surface_bbs->at(idx).min.x = xf - 0.5F;
+    surface_bbs->at(idx).min.z = zf - 0.5F;
+    surface_bbs->at(idx).max.x = xf + 0.5F;
+    surface_bbs->at(idx).max.z = zf + 0.5F;
 
-    surface_bbs.at(idx).min.y = current.nw;
-    if (current.ne < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.ne;
+    surface_bbs->at(idx).min.y = current.nw;
+    if (current.ne < surface_bbs->at(idx).min.y) {
+      surface_bbs->at(idx).min.y = current.ne;
     }
-    if (current.sw < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.sw;
+    if (current.sw < surface_bbs->at(idx).min.y) {
+      surface_bbs->at(idx).min.y = current.sw;
     }
-    if (current.se < surface_bbs.at(idx).min.y) {
-      surface_bbs.at(idx).min.y = current.se;
+    if (current.se < surface_bbs->at(idx).min.y) {
+      surface_bbs->at(idx).min.y = current.se;
     }
 
-    surface_bbs.at(idx).max.y = current.nw;
-    if (current.ne > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.ne;
+    surface_bbs->at(idx).max.y = current.nw;
+    if (current.ne > surface_bbs->at(idx).max.y) {
+      surface_bbs->at(idx).max.y = current.ne;
     }
-    if (current.sw > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.sw;
+    if (current.sw > surface_bbs->at(idx).max.y) {
+      surface_bbs->at(idx).max.y = current.sw;
     }
-    if (current.se > surface_bbs.at(idx).max.y) {
-      surface_bbs.at(idx).max.y = current.se;
+    if (current.se > surface_bbs->at(idx).max.y) {
+      surface_bbs->at(idx).max.y = current.se;
     }
   }
 }
 
 void TRunnerScreen::generate_surface_with_triangles() {
-  surface_triangles = surface_to_triangles(surface, SURFACE_UNIT_WIDTH);
+  surface_triangles = surface_to_triangles(*surface, SURFACE_UNIT_WIDTH);
   generate_surface();
   surface_reset_anim_timer = 0.0F;
   flags.set(0);

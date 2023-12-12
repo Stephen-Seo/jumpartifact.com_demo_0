@@ -57,7 +57,7 @@ fi
 
 # Validate and set up Raylib git clone
 
-if ! [[ -d "$CLONE_DIR" ]]; then
+if ! [[ -d "$CLONE_DIR" ]] || ! [[ -d "$CLONE_DIR/.git" ]]; then
     if ! git clone --depth 1 --no-single-branch "$RAYLIB_GIT_URL" "$CLONE_DIR"; then
         echo "ERROR: Failed to clone Raylib into \"$CLONE_DIR\"!"
         exit 4

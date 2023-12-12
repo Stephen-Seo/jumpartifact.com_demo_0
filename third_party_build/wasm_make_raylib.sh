@@ -40,6 +40,10 @@ popd >&/dev/null
 
 #echo "Using output dir: $OUTPUT_DIR"
 
+if ! [[ -d "$CLONE_DIR" ]]; then
+    mkdir -p "$CLONE_DIR"
+fi
+
 pushd "$CLONE_DIR" >&/dev/null
 CLONE_DIR="$(pwd)"
 popd >&/dev/null

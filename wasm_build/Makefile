@@ -38,12 +38,14 @@ HEADERS = \
 
 OBJECTS = $(addprefix ${OBJDIR}/,$(subst ..,PREVDIR,$(subst .cc,.cc.o,${SOURCES})))
 
-CXX = source ${HOME}/git/emsdk/emsdk_env.sh &>/dev/null && em++
+EMSDK_ENV_SH ?= ${HOME}/git/emsdk/emsdk_env.sh
+
+CXX = source ${EMSDK_ENV_SH} &>/dev/null && em++
 
 all: | format jumpartifact.com_demo_0.html
 
 raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h:
-	../third_party_build/wasm_make_raylib.sh -o raylib -c raylib_git
+	../third_party_build/wasm_make_raylib.sh -o raylib -c raylib_git -e ${EMSDK_ENV_SH}
 
 jumpartifact.com_demo_0.html: raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h ${OBJECTS} ${HEADERS}
 	${CXX} -std=c++20 -o jumpartifact.com_demo_0.html \

@@ -42,9 +42,12 @@ CXX = source ${HOME}/git/emsdk/emsdk_env.sh &>/dev/null && em++
 
 all: | format jumpartifact.com_demo_0.html
 
-jumpartifact.com_demo_0.html: ${OBJECTS} ${HEADERS}
+raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h:
+	../third_party_build/wasm_make_raylib.sh -o raylib -c raylib_git
+
+jumpartifact.com_demo_0.html: raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h ${OBJECTS} ${HEADERS}
 	${CXX} -std=c++20 -o jumpartifact.com_demo_0.html \
-		-s USE_GLFW=3 -I../wasm_include -L../wasm_lib -lraylib \
+		-s USE_GLFW=3 -Iraylib/include -Lraylib/lib -lraylib \
 		--shell-file custom_shell.html \
 		-sEXPORTED_FUNCTIONS=_main \
 		-sEXPORTED_RUNTIME_METHODS=ccall \
@@ -68,4 +71,4 @@ format:
 
 ${OBJDIR}/%.cc.o: $$(subst PREVDIR,..,%.cc) ${HEADERS}
 	@mkdir -p "$(dir $@)"
-	${CXX} -std=c++20 -I../wasm_include -c ${OTHER_FLAGS} -o $@ $<
+	${CXX} -std=c++20 -Iraylib/include -c ${OTHER_FLAGS} -o $@ $<

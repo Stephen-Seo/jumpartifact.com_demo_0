@@ -118,8 +118,8 @@ pushd src >&/dev/null
 # Save the library
 install -D -m444 libraylib.a "$OUTPUT_DIR/lib/libraylib.a"
 
-# Save the library and relevant headers
-for header in libraylib.a raylib.h raymath.h; do
+# Save the relevant headers
+for header in raylib.h raymath.h; do
     install -D -m444 "$header" "$OUTPUT_DIR/include/$header"
 done
 

@@ -9,11 +9,35 @@ on:
 jobs:
   Build-And-Deploy-main:
     if: github.ref_name == 'main'
-    runs-on: archLinux
+    runs-on: remote_self
     steps:
-      - run: cd && ./build_and_deploy_jumpartifact.com_demo_0.sh
+      - run: git clone https://git.seodisparate.com/stephenseo/jumpartifact.com_demo_0.git demo_0 && cd demo_0 && git checkout main
+      - run: test -d ${HOME}/emsdk || git clone https://github.com/emscripten-core/emsdk.git ${HOME}/emsdk
+      - run: cd ${HOME}/emsdk && git pull && ./emsdk install "$(cat ${GITHUB_WORKSPACE}/demo_0/emsdk_version)" && ./emsdk activate "$(cat ${GITHUB_WORKSPACE}/demo_0/emsdk_version)"
+      - run: sed -i -e '/\sclang-format/s|clang|#&|' demo_0/wasm_build/Makefile
+      - run: sed -i -e "/^EMSDK_ENV_SH/s|^.*$|EMSDK_ENV_SH = ${HOME}/emsdk/emsdk_env.sh|" demo_0/wasm_build/Makefile
+      - run: sed -i -e "/\s\.\.\/third_party_build/s|-c raylib_git|-c ${HOME}/raylib_git|" demo_0/wasm_build/Makefile
+      - run: /usr/bin/env RELEASE=1 make -C demo_0/wasm_build
+      - run: install -m555 -D -T demo_0/wasm_build/jumpartifact.com_demo_0.html demo_0_out/index.html
+      - run: install -m555 -D -t demo_0_out demo_0/wasm_build/jumpartifact.com_demo_0.js demo_0/wasm_build/jumpartifact.com_demo_0.wasm demo_0/wasm_build/jumpartifact.com_demo_0.data
+      - name: Deploy demo
+        env:
+          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_KEY }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:/srv/http/jumpartifact.com/demo0/
   Build-And-Deploy-devel:
     if: github.ref_name == 'devel'
-    runs-on: archLinux
+    runs-on: remote_self
     steps:
-      - run: cd && ./build_and_deploy_jumpartifact.com_demo_0_devel.sh
+      - run: git clone https://git.seodisparate.com/stephenseo/jumpartifact.com_demo_0.git demo_0 && cd demo_0 && git checkout devel
+      - run: test -d ${HOME}/emsdk || git clone https://github.com/emscripten-core/emsdk.git ${HOME}/emsdk
+      - run: cd ${HOME}/emsdk && git pull && ./emsdk install "$(cat ${GITHUB_WORKSPACE}/demo_0/emsdk_version)" && ./emsdk activate "$(cat ${GITHUB_WORKSPACE}/demo_0/emsdk_version)"
+      - run: sed -i -e '/\sclang-format/s|clang|#&|' demo_0/wasm_build/Makefile
+      - run: sed -i -e "/^EMSDK_ENV_SH/s|^.*$|EMSDK_ENV_SH = ${HOME}/emsdk/emsdk_env.sh|" demo_0/wasm_build/Makefile
+      - run: sed -i -e "/\s\.\.\/third_party_build/s|-c raylib_git|-c ${HOME}/raylib_git|" demo_0/wasm_build/Makefile
+      - run: /usr/bin/env RELEASE=1 make -C demo_0/wasm_build
+      - run: install -m555 -D -T demo_0/wasm_build/jumpartifact.com_demo_0.html demo_0_out/index.html
+      - run: install -m555 -D -t demo_0_out demo_0/wasm_build/jumpartifact.com_demo_0.js demo_0/wasm_build/jumpartifact.com_demo_0.wasm demo_0/wasm_build/jumpartifact.com_demo_0.data
+      - name: Deploy demo
+        env:
+          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_KEY }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:/srv/http/jumpartifact.com/demo0_devel/

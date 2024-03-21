@@ -57,7 +57,11 @@ void jumpartifact_demo_update(void *ud) {
 }
 
 int main() {
+#ifdef __EMSCRIPTEN__
+  InitWindow(call_js_get_canvas_width(), call_js_get_canvas_height(), "Demo");
+#else
   InitWindow(800, 800, "Demo");
+#endif
 
 #ifdef NDEBUG
   SetTraceLogLevel(LOG_WARNING);

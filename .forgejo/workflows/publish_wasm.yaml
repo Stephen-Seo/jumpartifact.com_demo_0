@@ -22,8 +22,8 @@ jobs:
       - run: install -m555 -D -t demo_0_out demo_0/wasm_build/jumpartifact.com_demo_0.js demo_0/wasm_build/jumpartifact.com_demo_0.wasm demo_0/wasm_build/jumpartifact.com_demo_0.data
       - name: Deploy demo
         env:
-          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_KEY }}
-        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:/srv/http/jumpartifact.com/demo0/
+          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_MAIN_KEY }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:./
   Build-And-Deploy-devel:
     if: github.ref_name == 'devel'
     runs-on: remote_self
@@ -39,5 +39,5 @@ jobs:
       - run: install -m555 -D -t demo_0_out demo_0/wasm_build/jumpartifact.com_demo_0.js demo_0/wasm_build/jumpartifact.com_demo_0.wasm demo_0/wasm_build/jumpartifact.com_demo_0.data
       - name: Deploy demo
         env:
-          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_KEY }}
-        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:/srv/http/jumpartifact.com/demo0_devel/
+          DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_DEVEL_KEY }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:./

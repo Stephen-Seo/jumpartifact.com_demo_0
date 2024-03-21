@@ -62,7 +62,9 @@ if ! [[ -d "$CLONE_DIR" ]] || ! [[ -d "$CLONE_DIR/.git" ]]; then
         echo "ERROR: Failed to clone Raylib into \"$CLONE_DIR\"!"
         exit 4
     fi
-elif ! (cd "$CLONE_DIR" && git fetch --all -p && git checkout "$RAYLIB_GIT_TAG"); then
+fi
+
+if ! (cd "$CLONE_DIR" && git fetch --all -p && git checkout "$RAYLIB_GIT_TAG"); then
     echo "ERROR: Failed to fetch/checkout in Raylib dir!"
     exit 5
 fi

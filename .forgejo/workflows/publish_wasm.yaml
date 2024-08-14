@@ -23,7 +23,8 @@ jobs:
       - name: Deploy demo
         env:
           DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_MAIN_KEY }}
-        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:./
+          DEPLOY_JA_ADDRESS: ${{ secrets.DEPLOY_JA_ADDRESS }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@${DEPLOY_JA_ADDRESS}:./
   Build-And-Deploy-devel:
     if: github.ref_name == 'devel'
     runs-on: remote_self
@@ -40,4 +41,5 @@ jobs:
       - name: Deploy demo
         env:
           DEPLOY_JA_DEMO_KEY: ${{ secrets.DEPLOY_JA_DEMO_DEVEL_KEY }}
-        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@seodisparate.com:./
+          DEPLOY_JA_ADDRESS: ${{ secrets.DEPLOY_JA_ADDRESS }}
+        run: set -o pipefail && set -u && umask 077 && echo "${DEPLOY_JA_DEMO_KEY}" | base64 -d - > ja_demo_key && rsync --rsh="ssh -i ja_demo_key" -r --delete demo_0_out/ deploy_user@${DEPLOY_JA_ADDRESS}:./

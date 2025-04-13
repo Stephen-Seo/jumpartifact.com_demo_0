@@ -42,13 +42,14 @@ EMSDK_ENV_SH ?= ${HOME}/git/emsdk/emsdk_env.sh
 
 CXX = source ${EMSDK_ENV_SH} &>/dev/null && em++
 
-all: | format jumpartifact.com_demo_0.html
+all: | format out/jumpartifact.com_demo_0.html
 
 raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h:
 	../third_party_build/wasm_make_raylib.sh -o raylib -c raylib_git -e ${EMSDK_ENV_SH}
 
-jumpartifact.com_demo_0.html: raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h ${OBJECTS} ${HEADERS}
-	${CXX} -std=c++20 -o jumpartifact.com_demo_0.html \
+out/jumpartifact.com_demo_0.html: raylib/lib/libraylib.a raylib/include/raylib.h raylib/include/raymath.h ${OBJECTS} ${HEADERS}
+	@mkdir -p out
+	${CXX} -std=c++20 -o out/jumpartifact.com_demo_0.html \
 		-s USE_GLFW=3 -Iraylib/include -Lraylib/lib -lraylib \
 		--shell-file custom_shell.html \
 		-sEXPORTED_FUNCTIONS=_main \
@@ -56,14 +57,12 @@ jumpartifact.com_demo_0.html: raylib/lib/libraylib.a raylib/include/raylib.h ray
 		--preload-file ../res \
 		${OTHER_FLAGS} \
 		${OBJECTS}
+	ln -s jumpartifact.com_demo_0.html out/index.html
 
 .PHONY: clean format
 
 clean:
-	rm -f jumpartifact.com_demo_0.html
-	rm -f jumpartifact.com_demo_0.js
-	rm -f jumpartifact.com_demo_0.wasm
-	rm -f jumpartifact.com_demo_0.data
+	rm -rf out
 	rm -rf "${OBJDIR}"
 
 format:

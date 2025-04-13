@@ -4,7 +4,7 @@ EMSDK_ENV_SCRIPT="${HOME}/git/emsdk/emsdk_env.sh"
 OUTPUT_DIR="$(dirname "$0")/raylib_out"
 CLONE_DIR="$(dirname "$0")/raylib_clone"
 RAYLIB_GIT_URL="https://github.com/raysan5/raylib.git"
-RAYLIB_GIT_TAG="5.0"
+RAYLIB_GIT_TAG="5.5"
 
 while getopts 'o:e:c:h' opt; do
     case $opt in
@@ -84,9 +84,8 @@ pushd "$CLONE_DIR" >&/dev/null
 # Patch for building for wasm.
 
 patch -N -p1 <<"EOF"
-Do not allow F12 usage as that is used in the browser for debugging purposes.
-
-For some reason, the variable `screenshotCounter` is still used.
+Do not allow F12 usage (screeenshot) as that is used in the browser for
+debugging purposes.
 
 --- a/src/config.h
 +++ b/src/config.h
@@ -99,18 +98,6 @@ For some reason, the variable `screenshotCounter` is still used.
  // Allow automatic gif recording of current screen pressing CTRL+F12, defined in KeyCallback()
  #define SUPPORT_GIF_RECORDING           1
  // Support CompressData() and DecompressData() functions
---- a/src/rcore.c
-+++ b/src/rcore.c
-@@ -349,9 +349,7 @@ RLAPI const char *raylib_version = RAYLIB_VERSION;  // raylib version exported s
- 
- CoreData CORE = { 0 };               // Global CORE state context
- 
--#if defined(SUPPORT_SCREEN_CAPTURE)
- static int screenshotCounter = 0;    // Screenshots counter
--#endif
- 
- #if defined(SUPPORT_GIF_RECORDING)
- int gifFrameCounter = 0;             // GIF frames counter
 EOF
 
 # Do the build

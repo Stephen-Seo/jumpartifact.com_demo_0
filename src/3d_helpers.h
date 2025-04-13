@@ -20,7 +20,7 @@ extern Matrix translate_matrix_xyz(float x, float y, float z);
 
 extern Matrix scale_matrix_xyz(float x, float y, float z);
 
-extern Matrix operator*(const Matrix &a, const Matrix &b);
+// extern Matrix operator*(const Matrix &a, const Matrix &b);
 
 /// Returns true if intersects with xz plane.
 extern bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out);
@@ -58,10 +58,10 @@ extern std::array<Vector3, 9> get_circle_facing_viewer(Vector3 pos,
 // weirdness regarding column-major matrices.
 // extern Vector4 operator*(const Matrix &m, const Vector4 &v);
 
-extern Vector3 operator+(Vector3 a, Vector3 b);
-extern Vector3 operator-(Vector3 a, Vector3 b);
+// extern Vector3 operator+(Vector3 a, Vector3 b);
+// extern Vector3 operator-(Vector3 a, Vector3 b);
 
-extern Vector3 operator*(Vector3 vec3, float factor);
+// extern Vector3 operator*(Vector3 vec3, float factor);
 
 extern Vector3 operator*(Matrix mat, Vector3 vec3);
 

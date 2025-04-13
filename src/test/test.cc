@@ -15,7 +15,7 @@
   }
 
 #define ASSERT_FLOAT_EQUALS(f, v)                                    \
-  if ((f) < (v)-0.1F || (f) > (v) + 0.1F) {                          \
+  if ((f) < (v) - 0.1F || (f) > (v) + 0.1F) {                        \
     std::cerr << "ASSERT_FLOAT_EQUALS: " << (f)                      \
               << " is not (roughly) equal to " << (v) << " at line " \
               << __LINE__ << "!\n";                                  \

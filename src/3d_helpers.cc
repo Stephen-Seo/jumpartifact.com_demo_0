@@ -125,9 +125,9 @@ Matrix scale_matrix_xyz(float x, float y, float z) {
                 0.0F, 0.0F, z,    0.0F, 0.0F, 0.0F, 0.0F, 1.0F};
 }
 
-Matrix operator*(const Matrix &a, const Matrix &b) {
-  return MatrixMultiply(a, b);
-}
+// Matrix operator*(const Matrix &a, const Matrix &b) {
+//   return MatrixMultiply(a, b);
+// }
 
 bool ray_to_xz_plane(const Ray &ray, float &x_out, float &z_out) {
   if (FloatEquals(ray.direction.y, 0.0F)) {
@@ -232,17 +232,17 @@ std::array<Vector3, 9> get_circle_facing_viewer(Vector3 pos, Vector3 normal,
   return vertices;
 }
 
-Vector3 operator+(Vector3 a, Vector3 b) {
-  return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
-}
+// Vector3 operator+(Vector3 a, Vector3 b) {
+//   return Vector3{a.x + b.x, a.y + b.y, a.z + b.z};
+// }
 
-Vector3 operator-(Vector3 a, Vector3 b) {
-  return Vector3{a.x - b.x, a.y - b.y, a.z - b.z};
-}
+// Vector3 operator-(Vector3 a, Vector3 b) {
+//   return Vector3{a.x - b.x, a.y - b.y, a.z - b.z};
+// }
 
-Vector3 operator*(Vector3 vec3, float factor) {
-  return Vector3Scale(vec3, factor);
-}
+// Vector3 operator*(Vector3 vec3, float factor) {
+//   return Vector3Scale(vec3, factor);
+// }
 
 Vector3 operator*(Matrix mat, Vector3 vec3) {
   return Vector3Transform(vec3, mat);

@@ -12,6 +12,10 @@
 // local includes
 #include "screen_test.h"
 
+#ifdef __EMSCRIPTEN__
+//#include <GLES2/gl2.h>
+#endif
+
 Screen::Screen(std::weak_ptr<ScreenStack> stack) : stack(stack) {}
 
 ScreenStack::PendingAction::PendingAction() : screen(), action(Action::NOP) {}
@@ -80,6 +84,11 @@ void ScreenStack::draw() {
   }
 
   BeginDrawing();
+
+#ifdef __EMSCRIPTEN__
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
+
   DrawTextureRec(
       render_texture->texture,
       Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},

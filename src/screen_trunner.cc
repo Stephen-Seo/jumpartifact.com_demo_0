@@ -18,6 +18,10 @@
 #include "ems.h"
 #include "screen_walker_hack.h"
 
+#ifdef __EMSCRIPTEN__
+//#include <GLES2/gl2.h>
+#endif
+
 TRunnerScreen::TRunnerScreen(std::weak_ptr<ScreenStack> stack)
     : Screen(stack),
       surface(),
@@ -476,6 +480,11 @@ bool TRunnerScreen::draw(RenderTexture *render_texture) {
   }
 
   BeginTextureMode(*render_texture);
+
+#ifdef __EMSCRIPTEN__
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
+
   DrawTextureRec(
       bgRenderTexture.texture,
       Rectangle{0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()},

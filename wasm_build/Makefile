@@ -1,12 +1,13 @@
+COMMON_FLAGS :=
 ifdef RELEASE
-	OTHER_FLAGS = -DNDEBUG -O3
+	OTHER_FLAGS := -DNDEBUG -O3 ${COMMON_FLAGS}
 else
-	OTHER_FLAGS = -Og
+	OTHER_FLAGS := -Og ${COMMON_FLAGS}
 endif
 
-OBJDIR = objdir
+OBJDIR := objdir
 
-SOURCES = \
+SOURCES := \
 		../src/main.cc \
 		../src/ems.cc \
 		../src/game.cc \
@@ -22,7 +23,7 @@ SOURCES = \
 		../src/spark_effect.cc \
 		../src/common_constants.cc
 
-HEADERS = \
+HEADERS := \
 		../src/ems.h \
 		../src/game.h \
 		../src/screen.h \
@@ -36,11 +37,11 @@ HEADERS = \
 		../src/spark_effect.h \
 		../src/common_constants.h
 
-OBJECTS = $(addprefix ${OBJDIR}/,$(subst ..,PREVDIR,$(subst .cc,.cc.o,${SOURCES})))
+OBJECTS := $(addprefix ${OBJDIR}/,$(subst ..,PREVDIR,$(subst .cc,.cc.o,${SOURCES})))
 
 EMSDK_ENV_SH ?= ${HOME}/git/emsdk/emsdk_env.sh
 
-CXX = source ${EMSDK_ENV_SH} &>/dev/null && em++
+CXX := source ${EMSDK_ENV_SH} &>/dev/null && em++
 
 all: | format out/jumpartifact.com_demo_0.html
 

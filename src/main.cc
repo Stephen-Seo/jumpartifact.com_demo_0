@@ -16,7 +16,7 @@
 
 #ifdef __EMSCRIPTEN__
 
-//#include <GLES2/gl2.h>
+// #include <GLES2/gl2.h>
 
 Game *global_game_ptr = nullptr;
 
@@ -79,7 +79,7 @@ int main() {
   emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, &game, false,
                                  resize_event_callback);
 
-  //glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_DEPTH_TEST);
 
   emscripten_set_main_loop_arg(jumpartifact_demo_update, &game, 0, 1);
 #else

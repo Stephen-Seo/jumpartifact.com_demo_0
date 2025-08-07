@@ -11,9 +11,9 @@ build to [jumpartifact.com/demo0](https://jumpartifact.com/demo0/).
 Clone `https://github.com/emscripten-core/emsdk.git` to `${HOME}/git/emsdk`, and
 run the following commands in the cloned directory:
 
-    git checkout 3.1.56
-    ./emsdk install 3.1.56
-    ./emsdk activate 3.1.56
+    git checkout 4.0.12
+    ./emsdk install 4.0.12
+    ./emsdk activate 4.0.12
 
 Now you can use emsdk by sourcing the `emsdk_env.sh` file and using emcc/em++.
 The Makefile in `wasm_build/` should now "just work" with `make`.
